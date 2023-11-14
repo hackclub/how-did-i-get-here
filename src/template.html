@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html lang='en'>
+	<head>
+		<meta charset='utf-8'>
+		<title>Traceroute</title>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<link rel='preconnect' href='https://fonts.googleapis.com'>
+		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Jetbrains+Mono:wght@400;700&display=swap'>
+		<style>
+			body, h1, p, ol, li {
+				list-style-type: none;
+				font-size: inherit;
+				padding: 0;
+				margin: 0;
+			}
+
+			body {
+				padding: 10px;
+				box-sizing: border-box;
+				max-width: 100ch;
+				margin: 0 auto;
+				font-family: 'Jetbrains Mono', monospace;
+				font-size: 0.85em;
+				background: #19171c;
+				color: #b8b5bf;
+			}
+
+			h1, .header, .pending {
+				font-weight: bold;
+			}
+
+			h1 {
+				text-align: center;
+			}
+
+			.metadata, .row {
+				display: flex;
+				flex-direction: row;
+				gap: 1ch;
+			}
+
+			.hostinfo {
+				flex: 1;
+			}
+
+			.date {
+				width: 24ch;
+				text-align: right;
+			}
+
+			.metadata div, .row div {
+				white-space: nowrap;
+				overflow: hidden;
+			}
+
+			.metadata div:last-child {
+				text-align: right;
+			}
+
+			.host {
+				flex: 1;
+			}
+
+			.asn {
+				max-width: 10ch;
+				flex: 1;
+			}
+
+			.network {
+				max-width: 25ch;
+				flex: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>ktr [v0.1.1]</h1>
+		<div class='metadata'>
+			<div class='hostinfo'><span id='thishost'>ktr.kognise.dev</span> -> your device (<!-- IP -->)</div>
+			<div class='date'><!-- DATE --></div>
+		</div>
+		<br>
+		<div class='row header'>
+			<div class='host'>Host</div>
+			<div class='asn'>ASN</div>
+			<div class='network'>Network</div>
+		</div>
+		<ol id='traceroute'>
+			<!-- STREAM SPLIT -->
+		</ol>
+	</body>
+</html>
