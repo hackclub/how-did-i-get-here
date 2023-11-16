@@ -49,7 +49,9 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId }
 		if (hop.networkInfo?.asn === 63949) {
 			linodeInfo = hop.networkInfo
 		}
+	}
 
+	for (const hop of update.hops) {
 		if (linodeInfo && !hop.networkInfo) {
 			hop.networkInfo = linodeInfo
 		}
