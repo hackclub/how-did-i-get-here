@@ -8,7 +8,7 @@ export function startKtrAgent() {
 		'--peeringdb-path', process.env.PEERINGDB_PATH,
 		'--disable-ipv6',
 		'--completion-timeout', '1s',
-		'--wait-time-per-hop', '100ms'
+		'--wait-time-per-hop' '150ms'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
 	agent.on('error', (err) => {
