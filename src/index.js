@@ -35,6 +35,7 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId }
 	const isTraceDone = update.kind === 'TraceDone'
 
 	// Improve hop info and prune multiple loading hops
+	let linodeInfo = null
 	for (let i = 0; i < update.hops.length; i++) {
 		const hop = update.hops[i]
 		if (!hop.hostname && hop.ip === pageGlobals.userIp) hop.hostname = 'your device'
@@ -43,6 +44,14 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId }
 		if (hop.kind === 'Pending' && update.hops[i + 1]?.kind === 'Pending') {
 			update.hops.splice(i, 1)
 			i--
+		}
+
+		if (hop.networkInfo?.asn === 63949) {
+			linodeInfo = hop.networkInfo
+		}
+
+		if (linodeInfo && !hop.networkInfo) {
+			hop.networkInfo = linodeInfo
 		}
 	}
 
