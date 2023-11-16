@@ -7,7 +7,9 @@ import { nanoid } from 'nanoid'
 const app = express()
 const ktr = startKtrAgent()
 
-const serverHost = 'ktr.kognise.dev'
+const serverHost = process.env.SERVER_HOST ?? 'localhost'
+const serverIp = process.env.SERVER_IP ?? '127.0.0.1'
+
 const templatePaths = {
 	page:         'src/templates/page.ejs',
 	updateStream: 'src/templates/update-stream.ejs',
@@ -66,8 +68,9 @@ app.get('/', (req, res) => {
 	// Globals for EJS renders
 	const pageGlobals = {
 		userIp,
-		isoDate: new Date().toISOString(),
 		serverHost,
+		serverIp,
+		isoDate: new Date().toISOString(),
 		ktrVersion
 	}
 
