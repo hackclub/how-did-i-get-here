@@ -3,7 +3,7 @@
   "module": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "sudo dotenv node src/index.js"
+    "start": "sudo ./node_modules/.bin/dotenv node src/index.js"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
