@@ -61,6 +61,7 @@ app.get('/', (req, res) => {
 	// Get user IP
 	let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
 	if (userIp === 'localhost' || userIp === '::1') userIp = '76.76.21.21' // kognise.dev
+	userIp = userIp.replace(/^::ffff:/, '')
 
 	// Globals for EJS renders
 	const pageGlobals = {
