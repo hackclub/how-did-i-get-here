@@ -4,11 +4,11 @@ import split from 'split'
 
 export function startKtrAgent() {
 	const agent = childProcess.spawn(process.env.KTR_AGENT_PATH, [
-		'--interface-name',
-		process.env.TRACEROUTE_INTERFACE_NAME,
-		'--peeringdb-path',
-		process.env.PEERINGDB_PATH,
-		'--disable-ipv6'
+		'--interface-name', process.env.TRACEROUTE_INTERFACE_NAME,
+		'--peeringdb-path', process.env.PEERINGDB_PATH,
+		'--disable-ipv6',
+		'--completion-timeout', '1s',
+		'--wait-time-per-hop', '100ms'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
 	agent.on('error', (err) => {
