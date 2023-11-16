@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html lang='en'>
+	<head>
+		<meta charset='utf-8'>
+		<title>Traceroute</title>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<link rel='preconnect' href='https://fonts.googleapis.com'>
+		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Jetbrains+Mono:wght@400;700&display=swap'>
+		<link rel='stylesheet' href='/style.css'>
+	</head>
+	<body>
+		<h1>ktr [v<%= pageGlobals.ktrVersion %>]</h1>
+		<div class='metadata'>
+			<div class='hostinfo'>your device (<%= pageGlobals.userIp %>) -> <%= pageGlobals.serverHost %></div>
+			<div class='date'><%= pageGlobals.isoDate %></div>
+		</div>
+		<br>
+		<div class='row header'>
+			<div class='host'>Host</div>
+			<div class='asn'>ASN</div>
+			<div class='network'>Network</div>
+		</div>
+		<!-- TRACEROUTE STREAM -->
+	</body>
+</html>

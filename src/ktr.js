@@ -51,3 +51,11 @@ export function startKtrAgent() {
 
 	return { trace }
 }
+
+function getKtrVersion() {
+	const res = childProcess.spawnSync(process.env.KTR_AGENT_PATH, [ '--version' ], { stdio: [ 'ignore', 'pipe', 'inherit' ] })
+	if (res.error) throw res.error
+	return res.stdout.toString().split(' ').at(-1).trim()
+}
+
+export const ktrVersion = getKtrVersion()

@@ -1,0 +1,27 @@
+<ol class='traceroute' id='<%= streamId %>'>
+	<% for (let i = 0; i < hops.length; i++) { %>
+		<% const hop = hops[i] %>
+		
+		<% if (hop.kind === 'Pending') { %>
+			<% if (isTraceDone && i === 0) { %>
+				<li class='no-response'>(no response from your router)</li>
+			<% } else if (isTraceDone) { %>
+				<li class='no-response'>(no response)</li>
+			<% } else { %>
+				<li class='pending'>(waiting for reply)</li>
+			<% } %>
+		<% } else if (hop.kind === 'FindingAsn') { %>
+			<li class='row'>
+				<div class='host'><%= hop.hostname ?? hop.ip %></div>
+				<div class='asn'></div>
+				<div class='network'></div>
+			</li>
+		<% } else if (hop.kind === 'Done') { %>
+			<li class='row'>
+				<div class='host'><%= hop.hostname ?? hop.ip %></div>
+				<div class='asn'>AS<%= hop.networkInfo?.asn ?? '???' %></div>
+				<div class='network'><%= hop.networkInfo?.network?.name ?? '' %></div>
+			</li>
+		<% } %>
+	<% } %>
+</ol>

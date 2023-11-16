@@ -1,72 +1,95 @@
 import express from 'express'
-import { startKtrAgent } from './ktr.js'
+import { startKtrAgent, ktrVersion } from './ktr.js'
+import ejs from 'ejs'
 import fs from 'node:fs'
-import dotenv from 'dotenv'
-
-dotenv.config()
+import { nanoid } from 'nanoid'
 
 const app = express()
 const ktr = startKtrAgent()
 
-app.get('/', (req, res) => {
-	const template = fs.readFileSync('src/template.html').toString()
-	const [ beforeSplit, afterSplit ] = template.split('<!-- STREAM SPLIT -->')
+const serverHost = 'ktr.kognise.dev'
+const templatePaths = {
+	page:         'src/templates/page.ejs',
+	updateStream: 'src/templates/update-stream.ejs',
+	traceroute:   'src/templates/traceroute.ejs'
+}
+const templateSplits = {
+	tracerouteStream: '<!-- TRACEROUTE STREAM -->'
+}
 
-	let ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
-	if (ip === 'localhost') ip = '76.76.21.21' // kognise.dev
-	const trace = ktr.trace(ip)
-	const date = new Date().toISOString()
+function readTemplates() {
+	return Object.fromEntries(Object.entries(templatePaths).map(([ name, path ]) => [
+		name,
+		fs.readFileSync(path).toString()
+	]))
+}
 
-	res.status(200)
-	res.contentType('text/html')
-	res.write(beforeSplit.replaceAll('<!-- IP -->', ip).replaceAll('<!-- DATE -->', date))
+function genStreamId() {
+	return 'str' + nanoid(4)
+}
 
-	function hop2html(hop, isDone, isHost) {
-		if (!hop.hostname && hop.ip === ip) hop.hostname = 'your device'
-		if (!hop.hostname && isHost) hop.hostname = 'ktr.kognise.dev'
+function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId }) {
+	const streamId = genStreamId()
+	const isTraceDone = update.kind === 'TraceDone'
 
-		if (hop.kind === 'Pending') {
-			if (isDone) {
-				return `<li class='no-response'>(no response)</li>`
-			} else {
-				return `<li class='pending'>(waiting for reply)</li>`
-			}
+	// Improve hop info and prune multiple loading hops
+	for (let i = 0; i < update.hops.length; i++) {
+		const hop = update.hops[i]
+		if (!hop.hostname && hop.ip === pageGlobals.userIp) hop.hostname = 'your device'
+		if (!hop.hostname && i === 0) hop.hostname = serverHost
+
+		if (hop.kind === 'Pending' && update.hops[i + 1]?.kind === 'Pending') {
+			update.hops.splice(i, 1)
+			i--
 		}
-		if (hop.kind === 'FindingAsn') return `
-			<li class='row'>
-				<div class='host'>${hop.hostname ?? hop.ip}</div>
-				<div class='asn'></div>
-				<div class='network'></div>
-			</li>
-		`
-		if (hop.kind === 'Done') return `
-			<li class='row'>
-				<div class='host'>${hop.hostname ?? hop.ip}</div>
-				<div class='asn'>AS${hop.networkInfo?.asn ?? '???'}</div>
-				<div class='network'>${hop.networkInfo?.network?.name ?? ''}</div>
-			</li>
-		`
 	}
 
-	let setHostIp = false
+	// Reverse hops
+	update.hops.reverse()
+
+	const html = (lastStreamId ? ejs.render(templates.updateStream, { pageGlobals, streamIds: [ lastStreamId ] }) : '')
+		+ ejs.render(templates.traceroute, { hops: update.hops, pageGlobals, streamId, isTraceDone })
+	return { streamId, html, isTraceDone }
+}
+
+app.use(express.static('src/static'))
+
+app.get('/', (req, res) => {
+	const templates = readTemplates()
+	const [ beforeSplit, afterSplit ] = templates.page.split(templateSplits.tracerouteStream)
+
+	// Get user IP
+	let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
+	if (userIp === 'localhost' || userIp === '::1') userIp = '76.76.21.21' // kognise.dev
+
+	// Globals for EJS renders
+	const pageGlobals = {
+		userIp,
+		isoDate: new Date().toISOString(),
+		serverHost,
+		ktrVersion
+	}
+
+	// Start trace
+	const trace = ktr.trace(userIp)
+
+	// Begin responding	to request
+	res.status(200)
+	res.contentType('text/html')
+	res.write(ejs.render(beforeSplit, { pageGlobals }))
+
+	// Stream traceroute updates
+	let lastStreamId = null
 	trace.on('update', (update) => {
-		const isDone = update.kind === 'TraceDone'
-		const innerHTML = update.hops
-			.reverse()
-			.map((hop,i)=>hop2html(hop,isDone,i===update.hops.length-1))
-			.join('')
-		res.write(`<script>document.getElementById('traceroute').innerHTML = JSON.parse(${JSON.stringify(JSON.stringify(innerHTML))})</script>`)
-		if (update.hops.at(-1).kind !== 'Pending' && !setHostIp) {
-			setHostIp = true
-			res.write(`<script>document.getElementById('thishost').innerText = 'ktr.kognise.dev (${update.hops.at(-1).ip})'</script>`)
-		}
-		if (isDone) {
-			console.log(JSON.stringify(update, null, '\t'))
-			res.write(`<noscript>${innerHTML}</noscript>`)
-			res.end(afterSplit)
-		}
+		const { streamId, html, isTraceDone } = renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId })
+		res.write(html)
+		lastStreamId = streamId
+		if (isTraceDone) res.end(afterSplit)
 	})
 })
 
+console.log('starting up...')
+console.log(`ktr version: ${ktrVersion}`)
+
 const port = parseInt(process.env.PORT || 3000)
-app.listen(port, () => console.log(`Listening on http://localhost:${port}`))
+app.listen(port, () => console.log(`listening on http://localhost:${port}`))
