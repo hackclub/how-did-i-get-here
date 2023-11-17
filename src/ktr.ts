@@ -1,7 +1,7 @@
 import childProcess from 'node:child_process'
 import EventEmitter from 'node:events'
 import split from 'split'
-import type { Command, ControllerResult, Output } from './ktr-types.ts'
+import type { Command, ControllerResult, Output } from './ktr-types.js'
 
 export interface TraceEmitter extends EventEmitter {
 	on(event: 'update', listener: (update: ControllerResult) => void): this

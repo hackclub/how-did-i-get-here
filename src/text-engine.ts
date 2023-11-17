@@ -1,4 +1,4 @@
-import type { ControllerResult_TraceDone, Hop, Hop_Done, Hop_FindingAsn, NetworkInfo } from './ktr-types.ts'
+import type { ControllerResult_TraceDone, Hop, Hop_Done, Hop_FindingAsn, NetworkInfo } from './ktr-types.js'
 
 interface Portion {
 	key: {

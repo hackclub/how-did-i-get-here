@@ -2,8 +2,8 @@ import express from 'express'
 import ejs from 'ejs'
 import fs from 'node:fs'
 import { nanoid } from 'nanoid'
-import { startKtrAgent, ktrVersion } from './ktr.ts'
-import { generateText } from './text-engine.ts'
+import { startKtrAgent, ktrVersion } from './ktr.js'
+import { generateText } from './text-engine.js'
 
 const app = express()
 const ktr = startKtrAgent()
