@@ -1,3 +1,4 @@
+import './env.js'
 import express from 'express'
 import ejs from 'ejs'
 import fs from 'node:fs'
