@@ -1,8 +1,9 @@
 import express from 'express'
-import { startKtrAgent, ktrVersion } from './ktr.js'
 import ejs from 'ejs'
 import fs from 'node:fs'
 import { nanoid } from 'nanoid'
+import { startKtrAgent, ktrVersion } from './ktr.js'
+import { generateText } from './text-engine.js'
 
 const app = express()
 const ktr = startKtrAgent()
@@ -51,9 +52,12 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId }
 		}
 	}
 
+	// Mark the first couple of internal hops as Linode's ASN
 	for (const hop of update.hops) {
 		if (linodeInfo && !hop.networkInfo) {
 			hop.networkInfo = linodeInfo
+		} else if (hop.networkInfo) {
+			break
 		}
 	}
 
@@ -82,7 +86,8 @@ app.get('/', (req, res) => {
 		serverHost,
 		serverIp,
 		isoDate: new Date().toISOString(),
-		ktrVersion
+		ktrVersion,
+		paragraphs: null
 	}
 
 	// Start trace
@@ -99,7 +104,10 @@ app.get('/', (req, res) => {
 		const { streamId, html, isTraceDone } = renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId })
 		res.write(html)
 		lastStreamId = streamId
-		if (isTraceDone) res.end(afterSplit)
+		if (isTraceDone) {
+			pageGlobals.paragraphs = generateText(update)
+			res.end(ejs.render(afterSplit, { pageGlobals }))
+		}
 	})
 })
 

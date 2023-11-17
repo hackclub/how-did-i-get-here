@@ -15,12 +15,25 @@
 			<div class='hostinfo'>your device (<%= pageGlobals.userIp %>) -> <%= pageGlobals.serverHost %> (<%= pageGlobals.serverIp %>)</div>
 			<div class='date'><%= pageGlobals.isoDate %></div>
 		</div>
+
 		<br>
+
 		<div class='row header'>
 			<div class='host'>Host</div>
 			<div class='asn'>ASN</div>
 			<div class='network'>Network</div>
 		</div>
 		<!-- TRACEROUTE STREAM -->
+		
+		<div class='text'>
+			<% if (pageGlobals.paragraphs) { %>
+				<% for (const paragraph of pageGlobals.paragraphs) { %>
+					<p><%= paragraph %></p>
+					<% } %>
+			<% } else { %>
+				<%# Should never get here, but, y'know, just in case... %>
+				<p>Running traceroute...</p>
+			<% } %>
+		</div>
 	</body>
 </html>

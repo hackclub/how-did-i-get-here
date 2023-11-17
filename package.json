@@ -3,17 +3,16 @@
   "module": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "sudo ./node_modules/.bin/dotenv node src/index.js"
+    "start": "sudo ./node_modules/.bin/dotenv ./node_modules/.bin/ts-node-esm src/index.js"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/express": "^4.17.21",
     "@types/node": "^20.9.0",
     "@types/split": "^1.0.5",
-    "dotenv-cli": "^7.3.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+    "dotenv-cli": "^7.3.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "ejs": "^3.1.9",

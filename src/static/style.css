@@ -61,3 +61,14 @@ h1 {
 	max-width: 25ch;
 	flex: 1;
 }
+
+.text {
+	font-family: sans-serif;
+	line-height: 1.55;
+	font-size: 1.1em;
+	margin-top: 48px;
+}
+
+.text p {
+	margin-top: 16px;
+}
