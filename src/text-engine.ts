@@ -18,7 +18,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		const lastPortion = portions.at(-1)
 		// Merge networks that are both pending, both the same ASN, or both the same organization
 		const keyMatches = lastPortion && lastPortion.key.kind === hop.kind
-			&& (hop.kind === 'Pending' || lastPortion.key.networkInfo?.asn === hop.networkInfo?.asn || lastPortion.key.networkInfo?.network?.organization.name === hop.networkInfo?.network?.organization.name)
+			&& (hop.kind === 'Pending'
+				|| lastPortion.key.networkInfo?.asn === hop.networkInfo?.asn
+				|| lastPortion.key.networkInfo?.network?.organization.id === hop.networkInfo?.network?.organization.id)
 
 		if (keyMatches) {
 			lastPortion.hops.push(hop)
@@ -34,13 +36,12 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
-	console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
-
 	// Merge portion gaps (ex: <[Comcast]> <[Pending]> <[Comcast]> -> <[Comcast, Pending, Comcast]>)
 	for (let i = 0; i < portions.length - 2; i++) {
 		const [ first, middle, last ] = portions.slice(i, i + 3)
 		const canSandwich = first.key.kind === 'Done' && middle.key.kind === 'Pending' && last.key.kind === 'Done'
-			&& (first.key.networkInfo?.asn === last.key.networkInfo?.asn || first.key.networkInfo?.network?.organization.name === last.key.networkInfo?.network?.organization.name)
+			&& (first.key.networkInfo?.asn === last.key.networkInfo?.asn
+				|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id))
 		if (canSandwich) {
 			first.hops.push(...middle.hops)
 			first.hops.push(...last.hops)
@@ -48,13 +49,19 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
+	console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
+
 	// Yeet the last portion into its own variable
 	const lastHops = portions.pop()!.hops
 	let prevHop = portions[0].hops[0]
 
 	// Start text generation
 	const paragraphs: string[] = []
-	const para = (strings: TemplateStringsArray, ...values: unknown[]) => String.raw({ raw: strings }, ...values).trim().replace(/\s+/g, ' ')
+	let lastWasSideNote = false
+	function pushParagraph(text: string) {
+		lastWasSideNote = false
+		paragraphs.push(text.trim().replace(/\s+/g, ' '))
+	}
 
 	const networkTypeCounts: Record<NetworkType, number> = {
 		NSP: 0,
@@ -203,30 +210,32 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				text += `That’s the first network we have any info on; chances are whoever handles your Internet is paying them for Internet access.`
 			}
 
-			paragraphs.push(text)
+			pushParagraph(text)
 		} else if (portion.key.networkInfo) {
-			paragraphs.push(para`
+			pushParagraph(`
 				The first portion of your trip went through ${portion.size === 1 ? 'a device' : 'devices'} in the network
 				AS${portion.key.networkInfo.asn}. I couldn’t find any information on it aside from its autonomous system number,
 				but chances are whoever handles your Internet is paying them for Internet access.
 			`)
 		} else {
-			paragraphs.push(para`
+			pushParagraph(`
 				After ${thatRouter ? 'that' : 'your'} router, you took a trip through ${portion.size === 1 ? 'a device ' : 'some devices'} in an unknown network,
 				probably internal to whatever network your computer is connected to.
 			`)
 		}
+		clarifyNoResponseIfNeeded(portion.hops, false)
 	}
 
 	let didClarifyHostname = false
 	function clarifyHostname(hop: Hop_Done) {
 		if (didClarifyHostname) return
-		paragraphs.push(para`
+		pushParagraph(`
 			(By the way, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking our DNS server
 			if there’s any name associated with the IP, ${hop.ip}. Since there was, I used the “pretty” human-readable
 			name instead of the numbers. Reverse DNS names are usually just designed to make debugging easier, and often
 			don’t even map back to the original IP.)
 		`)
+		lastWasSideNote = true
 		didClarifyHostname = true
 	}
 
@@ -234,12 +243,13 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	function clarifyNoResponseIfNeeded(hops: Hop[], isNextProbe: boolean) {
 		if (didClarifyNoResponse) return
 		if (hops.some(h => h.kind === 'Pending')) {
-			paragraphs.push(para`
+			pushParagraph(`
 				${isNextProbe ? `We didn’t actually get a response from the next probe.` : `By the way, see that “(no response)”?`}
 				There will often be a couple of those in the traceroute — not every server will consistently respond to us
 				and the Internet is unreliable! It’s a shame, but we can still get a pretty good idea of what’s going on
 				from the servers that do respond.
 			`)
+			lastWasSideNote = true
 			didClarifyNoResponse = true
 		}
 	}
@@ -250,7 +260,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		
 		const user = portion.hops.shift()!
 		if (user.kind === 'Pending') {
-			paragraphs.push(para`
+			didClarifyNoResponse = true
+			pushParagraph(`
 				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
 				to your ISP’s network, didn’t actually respond to my ping — this is pretty common for public routers — so we just
 				have to imagine its existence at the start of the traceroute.
@@ -258,7 +269,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			// Note: there can never be a second pending hop at the start of the traceroute, they're pruned beforehand.
 			firstSegment(portions.shift()!, false, false)
 		} else { // Done
-			paragraphs.push(para`
+			pushParagraph(`
 				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
 				to your ISP’s network, is the first item you’ll see in the traceroute alongside your public IP: ${user.ip}.
 			`)
@@ -283,12 +294,12 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			intermediates = '1-3'
 			const network = doneRemaining[0].key.networkInfo?.network
 			if (network) {
-				paragraphs.push(para`
+				pushParagraph(`
 					You took an intermediate jump through ${network.name.trim()}, a network owned by ${network.organization.name.trim()},
 					${describeNetworkType(network.networkType, true)}.
 				`)
 			} else {
-				paragraphs.push(para`
+				pushParagraph(`
 					You took an intermediate jump through AS${doneRemaining[0].key.networkInfo!.asn},
 					${describeNetworkType('Other', true)}.
 				`)
@@ -296,13 +307,13 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			}
 		} else if (doneRemaining.length === 2) {
 			intermediates = '1-3'
-			paragraphs.push(para`
+			pushParagraph(`
 				Next, you jumped through two networks: ${describePortionTersely(doneRemaining[0])} and ${describePortionTersely(doneRemaining[1])}.
 			`)
 		} else if (doneRemaining.length >= 3) {
 			intermediates = '1-3'
 			if (doneRemaining.length >= 4) intermediates = '4+'
-			paragraphs.push(para`
+			pushParagraph(`
 				Next, you took a long and meandering path through ${doneRemaining.slice(0, -1).map(describePortionTersely).join(', ')},
 				${doneRemaining.length >= 4 ? 'and finally' : 'and'} ${describePortionTersely(doneRemaining.at(-1)!)}.
 			`)
@@ -348,12 +359,12 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				'1-3': 'Eventually',
 				'4+':  'After all that'
 			}[intermediates]
-			paragraphs.push(para`
-				${prefix}, however, you needed to leave the realm of ${prevNetworkName} to reach my server. You went
-				through Akamai’s network (AS${AKAMAI_ASN}) — they’re a large CDN with many points of presence on the
-				Internet, so it makes sense that you might get routed through them. That said, Akamai also bought
-				Linode (our server provider) a couple of years back, so it makes sense that they would set themselves
-				up as a good path to Linode’s network.
+			pushParagraph(`
+				${prefix}, ${lastWasSideNote ? '' : 'however, '}you needed to leave the realm of ${prevNetworkName}
+				to reach my server. You went through Akamai’s network (AS${AKAMAI_ASN}) — they’re a large CDN with
+				many points of presence on the Internet, so it makes sense that you might get routed through them.
+				That said, Akamai also bought Linode (our server provider) a couple of years back, so it makes sense
+				that they would set themselves up as a good path to Linode’s network.
 			`)
 
 			hopsBeforeLinode = []
@@ -375,7 +386,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			clarifyNoResponseIfNeeded(hopsBeforeLinode.slice(-1), true)
 			clarifyNoResponseIfNeeded(lastHops, false)
 
-			paragraphs.push(para`
+			pushParagraph(`
 				${prefix}, you ended up at ${lastHops[0].hostname ?? lastHops[0].ip}, your entrypoint to Linode’s network.
 				From there, you were bounced around Linode’s internal network a bit before finally reaching our server.
 			`)
@@ -386,7 +397,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			let unknownHopCount = 0
 			while (lastHops.at(-1 - unknownHopCount)?.kind === 'Pending') unknownHopCount++
 
-			paragraphs.push(para`
+			pushParagraph(`
 				${prefix}, we have ${didClarifyNoResponse ? 'another' : 'a'} probe that didn't respond.
 				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Linode's network.
 				From there, you were bounced around Linode’s internal network a bit before finally reaching our server.
@@ -397,5 +408,5 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	return paragraphs
 }
 
-import _lastUpdate from './last-update.js'
-console.log(generateText(_lastUpdate as ControllerResult_TraceDone).join('\n\n'))
+import _testUpdate from './test-update.js'
+console.log(generateText(_testUpdate as ControllerResult_TraceDone).join('\n\n'))

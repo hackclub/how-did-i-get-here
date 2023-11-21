@@ -93,32 +93,7 @@ export default {
 			}
 		},
 		{
-			"kind": "Done",
-			"ip": "96.110.35.85",
-			"hostname": "be-1212-cs02.newark.nj.ibone.comcast.net",
-			"networkInfo": {
-				"asn": 7922,
-				"network": {
-					"id": 822,
-					"name": "Comcast",
-					"organization": {
-						"id": 1061,
-						"name": "Comcast Cable Communications, LLC",
-						"aka": "Comcast",
-						"url": ""
-					},
-					"url": "https://corporate.comcast.com/",
-					"geographicScope": "NorthAmerica",
-					"asn": 7922,
-					"networkType": "ISP",
-					"protocols": {
-						"unicastIpv4": true,
-						"multicast": false,
-						"ipv6": true,
-						"neverViaRouteServers": false
-					}
-				}
-			}
+			"kind": "Pending"
 		},
 		{
 			"kind": "Done",
