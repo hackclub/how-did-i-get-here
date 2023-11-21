@@ -53,12 +53,17 @@ h1 {
 }
 
 .asn {
-	max-width: 10ch;
+	max-width: 9ch;
 	flex: 1;
 }
 
 .network {
-	max-width: 25ch;
+	max-width: 23ch;
+	flex: 1;
+}
+
+.country {
+	max-width: 12ch;
 	flex: 1;
 }
 

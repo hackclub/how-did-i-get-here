@@ -1,4 +1,6 @@
-import type { ControllerResult_TraceDone, Hop, Hop_Done, Hop_FindingAsn, NetworkInfo } from './ktr-types.js'
+import './env.js'
+import { AKAMAI_ASN, LINODE_ASN, SERVER_HOST, SERVER_IP } from './env.js'
+import type { ControllerResult_TraceDone, Hop, Hop_Done, Hop_FindingAsn, NetworkInfo, NetworkType } from './ktr-types.js'
 
 interface Portion {
 	key: {
@@ -14,7 +16,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 	for (const hop of lastUpdate.hops) {
 		const lastPortion = portions.at(-1)
-		const keyMatches = lastPortion && lastPortion.key.kind === hop.kind && (hop.kind === 'Pending' || lastPortion.key.networkInfo?.asn === hop.networkInfo?.asn)
+		// Merge networks that are both pending, both the same ASN, or both the same organization
+		const keyMatches = lastPortion && lastPortion.key.kind === hop.kind
+			&& (hop.kind === 'Pending' || lastPortion.key.networkInfo?.asn === hop.networkInfo?.asn || lastPortion.key.networkInfo?.network?.organization.name === hop.networkInfo?.network?.organization.name)
 
 		if (keyMatches) {
 			lastPortion.hops.push(hop)
@@ -30,18 +34,158 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
-	const linodePortion = portions.at(-1)!
-	if (linodePortion?.key.networkInfo?.network?.asn !== 63949) console.error('WARNING: last portion is not Linode')
+	console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
 
-	const akamaiPortion = portions.at(-2)?.key?.networkInfo?.network?.asn === 20940 ? portions.at(-2)! : null // Second-to-last portion if Akamai, else null
+	// Merge portion gaps (ex: <[Comcast]> <[Pending]> <[Comcast]> -> <[Comcast, Pending, Comcast]>)
+	for (let i = 0; i < portions.length - 2; i++) {
+		const [ first, middle, last ] = portions.slice(i, i + 3)
+		const canSandwich = first.key.kind === 'Done' && middle.key.kind === 'Pending' && last.key.kind === 'Done'
+			&& (first.key.networkInfo?.asn === last.key.networkInfo?.asn || first.key.networkInfo?.network?.organization.name === last.key.networkInfo?.network?.organization.name)
+		if (canSandwich) {
+			first.hops.push(...middle.hops)
+			first.hops.push(...last.hops)
+			portions.splice(i + 1, 2)
+		}
+	}
+
+	// Yeet the last portion into its own variable
+	const lastHops = portions.pop()!.hops
+	let prevHop = portions[0].hops[0]
 
 	// Start text generation
 	const paragraphs: string[] = []
 	const para = (strings: TemplateStringsArray, ...values: unknown[]) => String.raw({ raw: strings }, ...values).trim().replace(/\s+/g, ' ')
 
-	let prevPortion = portions[0]!
+	const networkTypeCounts: Record<NetworkType, number> = {
+		NSP: 0,
+		Content: 0,
+		ISP: 0,
+		Enterprise: 0,
+		Educational: 0,
+		NonProfit: 0,
+		Government: 0,
+		RouteServer: 0,
+		NetworkServices: 0,
+		RouteCollector: 0,
+		Other: 0
+	}
+	function describeNetworkType(networkType: NetworkType, needsArticle: boolean) {
+		const count = networkTypeCounts[networkType]
+		networkTypeCounts[networkType]++
+		
+		let long: string  // Full name, including the article ("an" or "a")
+		let short: string // Abbreviation or single word only
+		let shortArticle: string | null   // The article that would accompany short, or null if long is required
+		let shortSupportsAnother: boolean // Whether short works with "another" as a prefix
+
+		switch (networkType) {
+			case 'NSP': {
+				long = 'a network service provider, a company that sells Internet access to other companies'
+				short = 'NSP'
+				shortArticle = 'a'
+				shortSupportsAnother = true
+				break
+			}
+			case 'Content': {
+				long = 'a content delivery network'
+				short = 'CDN'
+				shortArticle = 'a'
+				shortSupportsAnother = true
+				break
+			}
+			case 'ISP': {
+				long = 'an internet service provider'
+				short = 'ISP'
+				shortArticle = 'an'
+				shortSupportsAnother = true
+				break
+			}
+
+			case 'Enterprise': {
+				long = `a big enterprise network`
+				short = 'enterprise'
+				shortArticle = 'an'
+				shortSupportsAnother = false
+				break
+			}
+			case 'Educational': {
+				long = 'some educational establishment'
+				short = 'edu'
+				shortArticle = null
+				shortSupportsAnother = false
+				if (needsArticle && count === 1) return 'another educational establishment'
+				break
+			}
+			case 'NonProfit': {
+				long = 'a nonprofit-owned network'
+				short = 'nonprofit'
+				shortArticle = 'a'
+				shortSupportsAnother = false
+				break
+			}
+			case 'Government': {
+				long = 'a government-owned network'
+				short = 'government'
+				shortArticle = null
+				shortSupportsAnother = false
+				if (needsArticle && count === 1) return 'another government network'
+				break
+			}
+
+			case 'RouteServer': {
+				long = 'associated with a route server, which helps manage BGP sessions but doesn’t necessarily have its own network'
+				short = 'route server'
+				shortArticle = 'a'
+				shortSupportsAnother = true
+				break
+			}
+			case 'NetworkServices': {
+				long = 'a network infrastructure provider'
+				short = 'infrastructure'
+				shortArticle = null
+				shortSupportsAnother = false
+				if (needsArticle && count === 1) return 'another infrastructure provider'
+				break
+			}
+			case 'RouteCollector': {
+				long = 'a route collector, a network that just tries to ingest all BGP routes'
+				short = 'route collector'
+				shortArticle = 'a'
+				shortSupportsAnother = true
+				break
+			}
+
+			case 'Other': {
+				if (needsArticle) {
+					return `which I couldn't find much about`
+				} else {
+					return '???'
+				}
+			}
+		}
+
+		if (count === 0) {
+			return long
+		} else if (count === 1 && shortSupportsAnother) {
+			return 'another ' + short
+		} else if (needsArticle) {
+			return shortArticle + ' ' + short
+		} else {
+			return short
+		}
+	}
+
+	function describePortionTersely(portion: Portion) {
+		const network = portion.key.networkInfo?.network
+		if (network) {
+			return `${network.name.trim()} (${describeNetworkType(network.networkType, false)})`
+		} else {
+			return `AS${portion.key.networkInfo!.asn} (???)`
+		}
+	}
 
 	function firstSegment(portion: Portion, includesFirst: boolean, thatRouter: boolean) {
+		prevHop = portion.hops.at(-1)!
 		if (portion.key.networkInfo && portion.key.networkInfo.network) {
 			const network = portion.key.networkInfo.network
 
@@ -53,6 +197,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			text += `in ${network.organization.name.trim()}'s network. `
 
 			if (network.networkType === 'ISP') {
+				networkTypeCounts['ISP']++
 				text += `That’s probably your ISP, responsible for connecting you to the Internet in exchange for money.`
 			} else {
 				text += `That’s the first network we have any info on; chances are whoever handles your Internet is paying them for Internet access.`
@@ -77,52 +222,32 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	function clarifyHostname(hop: Hop_Done) {
 		if (didClarifyHostname) return
 		paragraphs.push(para`
-			(By the way, that ${hop.hostname} stuff is a reverse DNS lookup I did by asking our DNS server if there’s any
-			name associated with the IP, ${hop.ip}. Since there was, I used the “pretty” human-readable name instead of
-			the numbers. Reverse DNS names are usually just designed to make debugging easier, and often don’t even map
-			back to the original IP.)
+			(By the way, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking our DNS server
+			if there’s any name associated with the IP, ${hop.ip}. Since there was, I used the “pretty” human-readable
+			name instead of the numbers. Reverse DNS names are usually just designed to make debugging easier, and often
+			don’t even map back to the original IP.)
 		`)
 		didClarifyHostname = true
 	}
 
-	function tryEnd() {
-		const portion = portions[0]
-
-		if (portion === akamaiPortion) {
-			const networkName = prevPortion.key.networkInfo?.network?.organization?.name?.trim?.()
-				?? (prevPortion.key.networkInfo?.network?.asn && 'AS' + prevPortion.key.networkInfo.network.asn)
-				?? 'that network'
-
+	let didClarifyNoResponse = false
+	function clarifyNoResponseIfNeeded(hops: Hop[], isNextProbe: boolean) {
+		if (didClarifyNoResponse) return
+		if (hops.some(h => h.kind === 'Pending')) {
 			paragraphs.push(para`
-				After a couple of hops, however, you needed to leave the realm of ${networkName} to reach my server.
-				You went through Akamai’s network (AS${portion.key.networkInfo!.asn}) — they’re a large CDN with many
-				points of presence on the Internet, so it makes sense that you might get routed through them. That
-				said, Akamai also bought Linode (our server provider) a couple of years back, so it makes sense that
-				they would set themselves up as a good path to Linode’s network.
+				${isNextProbe ? `We didn’t actually get a response from the next probe.` : `By the way, see that “(no response)”?`}
+				There will often be a couple of those in the traceroute — not every server will consistently respond to us
+				and the Internet is unreliable! It’s a shame, but we can still get a pretty good idea of what’s going on
+				from the servers that do respond.
 			`)
-			
-			prevPortion = portions.shift()!
-			tryEnd() // Defer to end segment
-			return true
-		} else if (portion === linodePortion) {
-			const firstHop = portion.hops[0] as Hop_Done
-
-			paragraphs.push(para`
-				${prevPortion === akamaiPortion ? 'After Akamai' : 'Eventually'}, you ended up at ${firstHop.hostname ?? firstHop.ip},
-				your entrypoint to Linode’s network. From there, you were bounced around Linode’s internal network a bit before finally
-				reaching our server.
-			`)
-			if (firstHop.hostname) clarifyHostname(firstHop)
-
-			return true
+			didClarifyNoResponse = true
 		}
-
-		return false
 	}
-
+	
+	// Beginning and first segment
 	{
 		const portion = portions.shift()!
-
+		
 		const user = portion.hops.shift()!
 		if (user.kind === 'Pending') {
 			paragraphs.push(para`
@@ -131,37 +256,146 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				have to imagine its existence at the start of the traceroute.
 			`)
 			// Note: there can never be a second pending hop at the start of the traceroute, they're pruned beforehand.
-			prevPortion = portion
 			firstSegment(portions.shift()!, false, false)
 		} else { // Done
 			paragraphs.push(para`
 				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
 				to your ISP’s network, is the first item you’ll see in the traceroute alongside your public IP: ${user.ip}.
 			`)
-
+			
 			if (portion.size === 0) { // Only first hop was in this portion
-				prevPortion = portion
 				firstSegment(portions.shift()!, false, true)
 			} else { // >= 1 remaining
 				firstSegment(portion, true, true)
 			}
 		}
+	}
+	
+	// Intermediate segments
+	let intermediates: '0' | '1-3' | '4+' = '0'
+	{
+		if (portions[0]?.key?.kind === 'Pending') {
+			clarifyNoResponseIfNeeded(portions.shift()!.hops, true)
+		}
 
-		prevPortion = portion
+		const doneRemaining = portions.filter(portion => portion.key.kind === 'Done')
+		if (doneRemaining.length === 1) {
+			intermediates = '1-3'
+			const network = doneRemaining[0].key.networkInfo?.network
+			if (network) {
+				paragraphs.push(para`
+					You took an intermediate jump through ${network.name.trim()}, a network owned by ${network.organization.name.trim()},
+					${describeNetworkType(network.networkType, true)}.
+				`)
+			} else {
+				paragraphs.push(para`
+					You took an intermediate jump through AS${doneRemaining[0].key.networkInfo!.asn},
+					${describeNetworkType('Other', true)}.
+				`)
+			
+			}
+		} else if (doneRemaining.length === 2) {
+			intermediates = '1-3'
+			paragraphs.push(para`
+				Next, you jumped through two networks: ${describePortionTersely(doneRemaining[0])} and ${describePortionTersely(doneRemaining[1])}.
+			`)
+		} else if (doneRemaining.length >= 3) {
+			intermediates = '1-3'
+			if (doneRemaining.length >= 4) intermediates = '4+'
+			paragraphs.push(para`
+				Next, you took a long and meandering path through ${doneRemaining.slice(0, -1).map(describePortionTersely).join(', ')},
+				${doneRemaining.length >= 4 ? 'and finally' : 'and'} ${describePortionTersely(doneRemaining.at(-1)!)}.
+			`)
+		}
+
+		for (const portion of portions.slice(0, -1)) { // Not the last one yet, because this might be a transition to the end
+			clarifyNoResponseIfNeeded(portion.hops, false)
+			if (portion.key.kind === 'Done') prevHop = portion.hops.at(-1)!
+		}
 	}
 
-	while (portions.length > 0) {
-		if (tryEnd()) return paragraphs
-		const portion = portions.shift()!
+	// Ending
+	{
+		function isAkamai(hop: Hop): hop is Hop_Done {
+			return hop.kind === 'Done' && hop.networkInfo?.asn === AKAMAI_ASN
+		}
+		function isLinodeInternal(hop: Hop): hop is Hop_Done {
+			return hop.kind === 'Done' && hop.ip.startsWith('10.') && hop.networkInfo?.asn === LINODE_ASN
+		}
+		function isServer(hop: Hop): hop is Hop_Done {
+			return hop.kind === 'Done' && hop.ip === SERVER_IP && hop.hostname === SERVER_HOST
+		}
+		function isLinodeEntrypoint(hop: Hop): hop is Hop_Done {
+			return hop.kind === 'Done' && hop.networkInfo?.asn === LINODE_ASN && !isLinodeInternal(hop) && !isServer(hop)
+		}
 
-		paragraphs.push('[Beep boop! This paragraph needs content written.]')
+		let reachedAkamai = false
 
-		prevPortion = portion
+		let hopsBeforeLinode
+		if (isAkamai(lastHops[0])) {
+			// Somewhat easy, we at least have Akamai
+			
+			reachedAkamai = true
+			if (portions.at(-1)) clarifyNoResponseIfNeeded(portions.at(-1)!.hops, true)
+
+			const prevNetworkName = (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.name.trim?.())
+				?? (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.asn && 'AS' + prevHop.networkInfo.network.asn)
+				?? 'that network'
+
+			networkTypeCounts['Content']++
+			const prefix = {
+				'0':   'After a couple of hops',
+				'1-3': 'Eventually',
+				'4+':  'After all that'
+			}[intermediates]
+			paragraphs.push(para`
+				${prefix}, however, you needed to leave the realm of ${prevNetworkName} to reach my server. You went
+				through Akamai’s network (AS${AKAMAI_ASN}) — they’re a large CDN with many points of presence on the
+				Internet, so it makes sense that you might get routed through them. That said, Akamai also bought
+				Linode (our server provider) a couple of years back, so it makes sense that they would set themselves
+				up as a good path to Linode’s network.
+			`)
+
+			hopsBeforeLinode = []
+			while (!(isLinodeEntrypoint(lastHops[0]) || isLinodeInternal(lastHops[0]) || isServer(lastHops[0]))) {
+				hopsBeforeLinode.push(lastHops.shift()!)
+			}
+		} else {
+			hopsBeforeLinode = portions.at(-1)!.hops
+		}
+
+		const prefix = {
+			'0':   reachedAkamai ? 'After Akamai' : 'Eventually',
+			'1-3': reachedAkamai ? 'After Akamai' : 'Finally',
+			'4+':  reachedAkamai ? 'Finally'      : 'After all that'
+		}[intermediates]
+		if (isLinodeEntrypoint(lastHops[0])) {
+			// Easy, we have the Linode entrypoint
+			
+			clarifyNoResponseIfNeeded(hopsBeforeLinode.slice(-1), true)
+			clarifyNoResponseIfNeeded(lastHops, false)
+
+			paragraphs.push(para`
+				${prefix}, you ended up at ${lastHops[0].hostname ?? lastHops[0].ip}, your entrypoint to Linode’s network.
+				From there, you were bounced around Linode’s internal network a bit before finally reaching our server.
+			`)
+			if (lastHops[0].hostname) clarifyHostname(lastHops[0])
+		} else {
+			// We don't have the Linode endpoint
+			
+			let unknownHopCount = 0
+			while (lastHops.at(-1 - unknownHopCount)?.kind === 'Pending') unknownHopCount++
+
+			paragraphs.push(para`
+				${prefix}, we have ${didClarifyNoResponse ? 'another' : 'a'} probe that didn't respond.
+				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Linode's network.
+				From there, you were bounced around Linode’s internal network a bit before finally reaching our server.
+			`)
+		}
 	}
 
-	tryEnd()
 	return paragraphs
 }
 
-// import _lastUpdate from './last-update.js'
-// console.log(generateText(_lastUpdate as ControllerResult_TraceDone).join('\n\n'))
+import _lastUpdate from './last-update.js'
+console.log(generateText(_lastUpdate as ControllerResult_TraceDone).join('\n\n'))

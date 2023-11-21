@@ -15,12 +15,21 @@
 				<div class='host'><%= hop.hostname ?? hop.ip %></div>
 				<div class='asn'></div>
 				<div class='network'></div>
+				<div class='country'></div>
 			</li>
 		<% } else if (hop.kind === 'Done') { %>
 			<li class='row'>
 				<div class='host'><%= hop.hostname ?? hop.ip %></div>
 				<div class='asn'>AS<%= hop.networkInfo?.asn ?? '???' %></div>
 				<div class='network'><%= hop.networkInfo?.network?.name ?? '' %></div>
+				<div class='country'>
+					<% const scope = hop.networkInfo?.network?.geographicScope %>
+					<% if (scope && scope !== 'Other' && scope !== 'Regional') { %>
+						<%= scope %>
+					<% } else if (scope === 'Regional') { %>
+						(Regional)
+					<% } %>
+				</div>
 			</li>
 		<% } %>
 	<% } %>

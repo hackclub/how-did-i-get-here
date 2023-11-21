@@ -92,7 +92,13 @@ export interface Output_StartedTrace {
 	traceId: number
 }
 
-export type Output = Output_StartedTrace | ControllerResult
+export interface Output_LookupAsnResult {
+	kind: 'LookupAsnResult'
+	commandId: number
+	network: Network | null
+}
+
+export type Output = Output_StartedTrace | Output_LookupAsnResult | ControllerResult
 
 export interface Command_StartTrace {
 	kind: 'StartTrace'
@@ -100,4 +106,10 @@ export interface Command_StartTrace {
 	ip: string
 }
 
-export type Command = Command_StartTrace
+export interface Command_LookupAsn {
+	kind: 'LookupAsn'
+	commandId: number
+	asn: number
+}
+
+export type Command = Command_StartTrace | Command_LookupAsn
