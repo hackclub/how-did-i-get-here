@@ -46,6 +46,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			first.hops.push(...middle.hops)
 			first.hops.push(...last.hops)
 			portions.splice(i + 1, 2)
+			i--
 		}
 	}
 
