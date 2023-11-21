@@ -376,12 +376,12 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 			networkTypeCounts['Content']++
 			const prefix = {
-				'0':   'After a couple of hops',
+				'0':   `After a couple of hops${lastWasSideNote ? '' : ', however'}`,
 				'1-3': 'Eventually',
 				'4+':  'After all that'
 			}[intermediates]
 			pushParagraph(`
-				${prefix}, ${lastWasSideNote ? '' : 'however, '}you needed to leave the realm of ${prevNetworkName}
+				${prefix}, you needed to leave the realm of ${prevNetworkName}
 				to reach my server. You went through Akamai’s network (AS${AKAMAI_ASN}) — they’re a large CDN with
 				many points of presence on the Internet, so it makes sense that you might get routed through them.
 				That said, Akamai also bought Linode (our server provider) a couple of years back, so it makes sense
