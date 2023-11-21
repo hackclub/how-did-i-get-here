@@ -197,12 +197,17 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		if (portion.key.networkInfo && portion.key.networkInfo.network) {
 			const network = portion.key.networkInfo.network
 
+			const uniqueNetworks = new Set<number>()
+			for (const hop of portion.hops) if (hop.kind === 'Done' && hop.networkInfo?.network) uniqueNetworks.add(hop.networkInfo.network.id)
+
 			let text = ''
 			text += includesFirst ? `Starting at ` : `Traveling from `
 			text += thatRouter ? 'that router, ' : 'your router, '
 			text += 'the first portion of your trip went through '
 			text += portion.size === 1 ? 'a device ' : 'devices '
-			text += `in ${network.organization.name.trim()}'s network. `
+			text += `in ${network.organization.name.trim()}'s `
+			text += uniqueNetworks.size === 1 ? 'network' : 'networks'
+			text += '. '
 
 			if (network.networkType === 'ISP') {
 				networkTypeCounts['ISP']++
@@ -279,6 +284,22 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				firstSegment(portions.shift()!, false, true)
 			} else { // >= 1 remaining
 				firstSegment(portion, true, true)
+			}
+		}
+	}
+
+	// This is stupid, but from now on we only care about network-level, not org-level,
+	// so we have to re-chunk the portions by ASN
+	for (let i = 0; i < portions.length; i++) {
+		for (let j = 1; j < portions[i].hops.length; j++) {
+			const hop = portions[i].hops[j]
+			if (hop.kind === 'Done' && hop.networkInfo?.asn !== portions[i].key.networkInfo?.asn) {
+				const remainingHops = portions[i].hops.splice(j)
+				portions.splice(i + 1, 0, {
+					key: hop,
+					hops: remainingHops,
+					get size() { return this.hops.length }
+				})
 			}
 		}
 	}
@@ -409,5 +430,5 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	return paragraphs
 }
 
-import _testUpdate from './test-update.js'
-console.log(generateText(_testUpdate as ControllerResult_TraceDone).join('\n\n'))
+// import _testUpdate from './test-update.js'
+// console.log(generateText(_testUpdate as ControllerResult_TraceDone).join('\n\n'))
