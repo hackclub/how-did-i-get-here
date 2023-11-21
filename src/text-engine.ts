@@ -266,7 +266,6 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		
 		const user = portion.hops.shift()!
 		if (user.kind === 'Pending') {
-			didClarifyNoResponse = true
 			pushParagraph(`
 				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
 				to your ISP’s network, didn’t actually respond to my ping — this is pretty common for public routers — so we just
