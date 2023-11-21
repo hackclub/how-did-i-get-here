@@ -363,7 +363,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 		let reachedAkamai = false
 
-		let hopsBeforeLinode
+		let hopsBeforeLinode: Hop[]
 		if (isAkamai(lastHops[0])) {
 			// Somewhat easy, we at least have Akamai
 			
@@ -393,7 +393,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				hopsBeforeLinode.push(lastHops.shift()!)
 			}
 		} else {
-			hopsBeforeLinode = portions.at(-1)!.hops
+			hopsBeforeLinode = portions.at(-1)?.hops ?? []
 		}
 
 		const prefix = {

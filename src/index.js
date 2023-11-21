@@ -79,41 +79,41 @@ app.use(express.static('src/static'))
 app.use(router)
 
 router.get('/', async (req, res) => {
-	try {
-		const linodeInfo = {
-			asn: LINODE_ASN,
-			network: await ktr.lookupAsn(LINODE_ASN)
-		}
+	const linodeInfo = {
+		asn: LINODE_ASN,
+		network: await ktr.lookupAsn(LINODE_ASN)
+	}
 
-		const templates = readTemplates()
-		const [ beforeSplit, afterSplit ] = templates.page.split(TEMPLATE_SPLITS.tracerouteStream)
+	const templates = readTemplates()
+	const [ beforeSplit, afterSplit ] = templates.page.split(TEMPLATE_SPLITS.tracerouteStream)
 
-		// Get user IP
-		let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
-		if (userIp === 'localhost' || userIp === '::1') userIp = '76.76.21.21' // kognise.dev
-		userIp = userIp.replace(/^::ffff:/, '')
+	// Get user IP
+	let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
+	if (userIp === 'localhost' || userIp === '::1') userIp = '76.76.21.21' // kognise.dev
+	userIp = userIp.replace(/^::ffff:/, '')
 
-		// Globals for EJS renders
-		const pageGlobals = {
-			userIp,
-			serverHost: SERVER_HOST,
-			serverIp: SERVER_IP,
-			isoDate: new Date().toISOString(),
-			ktrVersion,
-			paragraphs: null
-		}
+	// Globals for EJS renders
+	const pageGlobals = {
+		userIp,
+		serverHost: SERVER_HOST,
+		serverIp: SERVER_IP,
+		isoDate: new Date().toISOString(),
+		ktrVersion,
+		paragraphs: null
+	}
 
-		// Start trace
-		const trace = ktr.trace(userIp)
+	// Start trace
+	const trace = ktr.trace(userIp)
 
-		// Begin responding	to request
-		res.status(200)
-		res.contentType('text/html')
-		res.write(ejs.render(beforeSplit, { pageGlobals }))
+	// Begin responding	to request
+	res.status(200)
+	res.contentType('text/html')
+	res.write(ejs.render(beforeSplit, { pageGlobals }))
 
-		// Stream traceroute updates
-		let lastStreamId = null
-		trace.on('update', (update) => {
+	// Stream traceroute updates
+	let lastStreamId = null
+	trace.on('update', (update) => {
+		try {
 			const { streamId, html, isTraceDone } = renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, linodeInfo })
 			res.write(html)
 			lastStreamId = streamId
@@ -121,11 +121,11 @@ router.get('/', async (req, res) => {
 				pageGlobals.paragraphs = generateText(update)
 				res.end(ejs.render(afterSplit, { pageGlobals }))
 			}
-		})
-	} catch (error) {
-		console.error(error)
-		res.sendStatus(500)
-	}
+		} catch (error) {
+			console.error(error)
+			res.sendStatus(500)
+		}
+	})
 })
 
 console.log('starting up...')
