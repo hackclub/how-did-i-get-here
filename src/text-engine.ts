@@ -215,7 +215,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			} else {
 				text += `
 					That’s the first network we have any info on; chances are whoever handles your Internet is paying them
-					for Internet access, or perhaps they're a VPN provider.
+					for Internet access.
 				`
 			}
 
