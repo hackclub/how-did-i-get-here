@@ -34,6 +34,7 @@ export interface NetworkInfo {
 export interface Hop_Pending {
 	kind: 'Pending'
 	id: number
+	since: number
 }
 
 export interface Hop_FindingAsn {

@@ -6,7 +6,7 @@ import semver from 'semver'
 import type { Command, ControllerResult, Network, Output } from './ktr-types.js'
 
 // Update this if when you add code relying on new ktr features
-const KTR_VERSION_SPEC = '^0.5.0'
+const KTR_VERSION_SPEC = '^0.5.2'
 
 export interface TraceEmitter extends EventEmitter {
 	on(event: 'update', listener: (update: ControllerResult) => void): this
@@ -19,7 +19,8 @@ export function startKtrAgent() {
 		'--peeringdb-path', PEERINGDB_PATH,
 		'--disable-ipv6',
 		'--completion-timeout', '1s',
-		'--wait-time-per-hop', '100ms'
+		'--destination-timeout', '1s',
+		'--wait-time-per-hop', '150ms'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
 	agent.on('error', (err) => {
@@ -41,6 +42,7 @@ export function startKtrAgent() {
 
 	const splitter = split(JSON.parse, undefined, { trailing: false /* don't crash on EOF, we handle it in "exit" event */ })
 	agent.stdout.pipe(splitter).on('data', (output: Output) => {
+		console.log('hi', output)
 		if (output.kind === 'StartedTrace') {
 			startedTraces[output.commandId]?.(output.traceId)
 		} else if (output.kind === 'LookupAsnResult') {

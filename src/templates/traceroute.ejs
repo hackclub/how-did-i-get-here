@@ -8,7 +8,12 @@
 			<% } else if (isTraceDone) { %>
 				<li class='no-response'>(no response)</li>
 			<% } else { %>
-				<li class='pending'>(waiting for reply)</li>
+				<% const secs = Math.round(Math.max(Date.now() - hop.since, 0) / 1000) %>
+				<% if (secs >= 1) { %>
+					<li class='pending'>(waiting for reply... <%= secs %>s)</li>
+				<% } else { %>
+					<li class='pending'>(waiting for reply)</li>
+				<% } %>
 			<% } %>
 		<% } else if (hop.kind === 'FindingAsn') { %>
 			<li class='row'>
