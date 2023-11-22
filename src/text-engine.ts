@@ -215,7 +215,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			} else {
 				text += `
 					That’s the first network we have any info on; chances are whoever handles your Internet is paying them
-					for Internet access, or perhaps they're your VPN provider.
+					for Internet access, or perhaps they're a VPN provider.
 				`
 			}
 
@@ -277,11 +277,20 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			// Note: there can never be a second pending hop at the start of the traceroute, they're pruned beforehand.
 			firstSegment(portions.shift()!, false, false)
 		} else { // Done
-			pushParagraph(`
-				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
-				to the Internet, is the first item you’ll see in the traceroute ${user.hostname ? 'and is associated with' : 'alongside'}
-				your public IP: ${user.ip}.
-			`)
+			if (user.networkInfo?.network?.networkType === 'ISP') {
+				pushParagraph(`
+					Your journey to load this website started with your computer talking to your router. That router, your entrypoint
+					to your ISP's network, is the first item you’ll see in the traceroute ${user.hostname ? 'and is associated with' : 'alongside'}
+					your public IP: ${user.ip}.
+				`)
+			} else {
+				pushParagraph(`
+					Your journey to load this website started with your computer talking to your router. That router, your entrypoint
+					to the Internet, may be the first item you see in the traceroute (${user.hostname ? 'associated with' : 'alongside'}
+					your public IP, ${user.ip}). Alternately, you may be behind a VPN of some sort — in that case, the earliest point we
+					can track is the Internet-facing router that your packets are being sent through.
+				`)
+			}
 			
 			if (portion.size === 0) { // Only first hop was in this portion
 				firstSegment(portions.shift()!, false, true)
@@ -336,7 +345,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			}
 
 			if (description.includes(',')) {
-				pushParagraph(`${prefix} — ${description}.`)
+				pushParagraph(`${prefix}. They're ${description}.`)
 			} else {
 				pushParagraph(`${prefix}, ${description}.`)
 			}
