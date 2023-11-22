@@ -123,7 +123,6 @@ router.get('/', async (req, res) => {
 			}
 		} catch (error) {
 			console.error(error)
-			res.sendStatus(500)
 		}
 	})
 })

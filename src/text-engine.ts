@@ -213,7 +213,10 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				networkTypeCounts['ISP']++
 				text += `That’s probably your ISP, responsible for connecting you to the Internet in exchange for money.`
 			} else {
-				text += `That’s the first network we have any info on; chances are whoever handles your Internet is paying them for Internet access.`
+				text += `
+					That’s the first network we have any info on; chances are whoever handles your Internet is paying them
+					for Internet access, or perhaps they're your VPN provider.
+				`
 			}
 
 			pushParagraph(text)
@@ -268,15 +271,16 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		if (user.kind === 'Pending') {
 			pushParagraph(`
 				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
-				to your ISP’s network, didn’t actually respond to my ping — this is pretty common for public routers — so we just
-				have to imagine its existence at the start of the traceroute.
+				to your ISP’s network, didn’t actually respond to my ping — this is pretty common for public routers or if you're
+				behind a VPN — so we just have to imagine its existence at the start of the traceroute.
 			`)
 			// Note: there can never be a second pending hop at the start of the traceroute, they're pruned beforehand.
 			firstSegment(portions.shift()!, false, false)
 		} else { // Done
 			pushParagraph(`
 				Your journey to load this website started with your computer talking to your router. That router, your entrypoint
-				to your ISP’s network, is the first item you’ll see in the traceroute alongside your public IP: ${user.ip}.
+				to the Internet, is the first item you’ll see in the traceroute ${user.hostname ? 'and is associated with' : 'alongside'}
+				your public IP: ${user.ip}.
 			`)
 			
 			if (portion.size === 0) { // Only first hop was in this portion
@@ -314,17 +318,27 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		if (doneRemaining.length === 1) {
 			intermediates = '1-3'
 			const network = doneRemaining[0].key.networkInfo?.network
+
+			let prefix
+			let description
 			if (network) {
-				pushParagraph(`
-					You took an intermediate jump through ${network.name.trim()}, a network owned by ${network.organization.name.trim()},
-					${describeNetworkType(network.networkType, true)}.
-				`)
+				const [ netName, orgName ] = [ network.name.trim(), network.organization.name.trim() ]
+				if (netName === orgName) {
+					prefix = `You took an intermediate jump through ${netName}`
+					description = describeNetworkType(network.networkType, true)
+				} else {
+					prefix = `You took an intermediate jump through ${netName}, a network owned by ${orgName}`
+					description = describeNetworkType(network.networkType, true)
+				}
 			} else {
-				pushParagraph(`
-					You took an intermediate jump through AS${doneRemaining[0].key.networkInfo!.asn},
-					${describeNetworkType('Other', true)}.
-				`)
-			
+				prefix = `You took an intermediate jump through AS${doneRemaining[0].key.networkInfo!.asn}`
+				description = describeNetworkType('Other', true)
+			}
+
+			if (description.includes(',')) {
+				pushParagraph(`${prefix} — ${description}.`)
+			} else {
+				pushParagraph(`${prefix}, ${description}.`)
 			}
 		} else if (doneRemaining.length === 2) {
 			intermediates = '1-3'
@@ -340,8 +354,10 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			`)
 		}
 
-		for (const portion of portions.slice(0, -1)) { // Not the last one yet, because this might be a transition to the end
-			clarifyNoResponseIfNeeded(portion.hops, false)
+		for (const portion of portions) {
+			if (portion === portions.at(-1)) { // Not the last one yet, because this might be a transition to the end
+				clarifyNoResponseIfNeeded(portion.hops, false)
+			}
 			if (portion.key.kind === 'Done') prevHop = portion.hops.at(-1)!
 		}
 	}
@@ -368,7 +384,10 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			// Somewhat easy, we at least have Akamai
 			
 			reachedAkamai = true
-			if (portions.at(-1)) clarifyNoResponseIfNeeded(portions.at(-1)!.hops, true)
+			if (portions.at(-1)) {
+				const transitionIsPending = portions.at(-1)!.hops.at(-1)?.kind === 'Pending'
+				clarifyNoResponseIfNeeded(portions.at(-1)!.hops, transitionIsPending)
+			}
 
 			const prevNetworkName = (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.name.trim?.())
 				?? (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.asn && 'AS' + prevHop.networkInfo.network.asn)
