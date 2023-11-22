@@ -215,7 +215,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			} else {
 				text += `
 					That’s the first network we have any info on; chances are whoever handles your Internet is paying them
-					for Internet access.
+					for Internet access or they're your VPN provider.
 				`
 			}
 
@@ -224,7 +224,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			pushParagraph(`
 				The first portion of your trip went through ${portion.size === 1 ? 'a device' : 'devices'} in the network
 				AS${portion.key.networkInfo.asn}. I couldn’t find any information on it aside from its autonomous system number,
-				but chances are whoever handles your Internet is paying them for Internet access.
+				but chances are whoever handles your Internet is paying them for Internet access or they're your VPN provider.
 			`)
 		} else {
 			pushParagraph(`
