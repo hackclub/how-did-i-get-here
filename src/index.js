@@ -102,7 +102,7 @@ router.get('/', async (req, res) => {
 		paragraphs: null
 	}
 
-	Start trace
+	// Start trace
 	const trace = ktr.trace(userIp)
 
 	// Begin responding	to request
