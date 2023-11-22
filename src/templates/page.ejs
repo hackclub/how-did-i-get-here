@@ -6,27 +6,31 @@
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel='preconnect' href='https://fonts.googleapis.com'>
 		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Jetbrains+Mono:wght@400;700&display=swap'>
+		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Lato&display=swap'>
 		<link rel='stylesheet' href='/style.css'>
 	</head>
 	<body>
-		<h1>ktr [v<%= pageGlobals.ktrVersion %>]</h1>
-		<div class='metadata'>
-			<div class='hostinfo'>your device (<%= pageGlobals.userIp %>) -> <%= pageGlobals.serverHost %> (<%= pageGlobals.serverIp %>)</div>
-			<div class='date'><%= pageGlobals.isoDate %></div>
-		</div>
+		<section class='terminal'>
+			<div class='terminal-inner'>
+				<h1>ktr [v<%= pageGlobals.ktrVersion %>]</h1>
+				<div class='metadata'>
+					<div class='hostinfo'>your device (<%= pageGlobals.userIp %>) -> <%= pageGlobals.serverHost %> (<%= pageGlobals.serverIp %>)</div>
+					<div class='date'><%= pageGlobals.isoDate %></div>
+				</div>
 
-		<br>
+				<br>
 
-		<div class='row header'>
-			<div class='host'>Host</div>
-			<div class='asn'>ASN</div>
-			<div class='network'>Network</div>
-			<div class='country'>Region</div>
-		</div>
-		<!-- TRACEROUTE STREAM -->
+				<div class='row header'>
+					<div class='host'>Host</div>
+					<div class='asn'>ASN</div>
+					<div class='network'>Network</div>
+					<div class='country'>Region</div>
+				</div>
+				<!-- TRACEROUTE STREAM -->
+			</div>
+		</section>
 		
-		<div class='text'>
+		<section class='text'>
 			<% if (pageGlobals.paragraphs) { %>
 				<% for (const paragraph of pageGlobals.paragraphs) { %>
 					<p><%= paragraph %></p>
@@ -35,6 +39,6 @@
 				<%# Should never get here, but, y'know, just in case... %>
 				<p>Running traceroute...</p>
 			<% } %>
-		</div>
+		</section>
 	</body>
 </html>

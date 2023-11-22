@@ -456,6 +456,3 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 	return paragraphs
 }
-
-// import _testUpdate from './test-update.js'
-// console.log(generateText(_testUpdate as ControllerResult_TraceDone).join('\n\n'))
