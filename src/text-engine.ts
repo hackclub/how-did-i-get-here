@@ -193,9 +193,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		} else {
 			unknownNetworkCount++
 			if (unknownNetworkCount === 1) {
-				return 'an unknown network'
+				return 'an unidentified network'
 			} else {
-				return 'another unknown network'
+				return 'another unidentified network'
 			}
 		}
 	}
@@ -236,7 +236,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			`)
 		} else {
 			pushParagraph(`
-				After ${thatRouter ? 'that' : 'your'} router, you took a trip through ${portion.size === 1 ? 'a device ' : 'some devices'} in an unknown network,
+				After ${thatRouter ? 'that' : 'your'} router, you took a trip through ${portion.size === 1 ? 'a device ' : 'some devices'} in an unidentified network,
 				probably internal to whatever network your computer is connected to.
 			`)
 		}
