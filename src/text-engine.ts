@@ -183,12 +183,20 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
+	let unknownNetworkCount = 0
 	function describePortionTersely(portion: Portion) {
 		const network = portion.key.networkInfo?.network
 		if (network) {
 			return `${network.name.trim()} (${describeNetworkType(network.networkType, false)})`
+		} else if (portion.key.networkInfo) {
+			return `AS${portion.key.networkInfo.asn} (???)`
 		} else {
-			return `AS${portion.key.networkInfo!.asn} (???)`
+			unknownNetworkCount++
+			if (unknownNetworkCount === 1) {
+				return 'an unknown network'
+			} else {
+				return 'another unknown network'
+			}
 		}
 	}
 
