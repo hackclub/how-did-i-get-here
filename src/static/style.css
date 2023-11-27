@@ -9,6 +9,7 @@ body {
 	--terminal-padding: 24px;
 	--terminal-charwidth: 100ch;
 	padding: 40px 10px;
+	padding-top: 30px;
 	box-sizing: border-box;
 	max-width: var(--terminal-charwidth);
 	margin: 0 auto;
@@ -18,12 +19,20 @@ body {
 	color: #ced4da;
 }
 
+.header {
+	display: block;
+	width: 100%;
+	max-width: 700px;
+	margin: 0 auto;
+	margin-bottom: 10px;
+}
+
 .terminal {
 	background: #0e0e11;
 	padding: var(--terminal-padding);
 	padding-top: calc(var(--terminal-padding) - 4px);
 	border-radius: 10px;
-	overflow-x: auto;
+	overflow-x: visible;
 }
 
 .text {
@@ -49,6 +58,10 @@ h1 {
 	gap: 1ch;
 }
 
+.metadata, .row, .no-response {
+	position: relative;
+}
+
 .hostinfo {
 	flex: 1;
 }
@@ -71,6 +84,34 @@ h1 {
 .asn     { max-width: 9ch;  flex: 1; }
 .network { max-width: 23ch; flex: 1; }
 .country { max-width: 12ch; flex: 1; }
+
+.landmark {
+	--width: 15ch;
+	position: absolute;
+	text-align: right;
+	width: var(--width);
+	left: calc(var(--width) * -1 - 20px);
+}
+.landmark.you    { color: #ff6b6b; }
+.landmark.server { color: #339af0; }
+
+h2, h3 {
+	margin-top: 40px;
+	margin-bottom: 16px;
+	color: #ffffff;
+}
+
+@media (max-width: 1050px) {
+	.landmark {
+		display: inline;
+		position: static;
+		left: 0;
+	}
+
+	.hide-when-inline-landmark {
+		display: none;
+	}
+}
 
 @media (max-width: 500px) {
 	.country { display: none; }

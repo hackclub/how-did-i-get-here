@@ -4,7 +4,11 @@
 		
 		<% if (hop.kind === 'Pending') { %>
 			<% if (isTraceDone && i === 0) { %>
-				<li class='no-response'>(no response from your router)</li>
+				<li class='no-response'>
+					<div class='landmark you'>You are here -></div>
+
+					(no response<span class='hide-when-inline-landmark'> from your router</span>)
+				</li>
 			<% } else if (isTraceDone) { %>
 				<li class='no-response'>(no response)</li>
 			<% } else { %>
@@ -24,7 +28,27 @@
 			</li>
 		<% } else if (hop.kind === 'Done') { %>
 			<li class='row'>
-				<div class='host'><%= hop.hostname ?? hop.ip %></div>
+				<div class='host'>
+					<% if (i === hops.length - 1) { %>
+						<div class='landmark server'>
+							Our server
+							<span class='hide-when-inline-landmark'>-></span>
+						</div>
+					
+						<span class='hide-when-inline-landmark'>
+							<%= hop.hostname ?? hop.ip %>
+						</span>
+					<% } else if (isTraceDone && i === 0) { %>
+						<div class='landmark you'>
+							You
+							<span class='hide-when-inline-landmark'>are here</span>
+							->
+						</div>
+						<%= hop.hostname ?? hop.ip %>
+					<% } else { %>
+						<%= hop.hostname ?? hop.ip %>
+					<% } %>
+				</div>
 				<div class='asn'>AS<%= hop.networkInfo?.asn ?? '???' %></div>
 				<div class='network'><%= hop.networkInfo?.network?.name ?? '' %></div>
 				<div class='country'>

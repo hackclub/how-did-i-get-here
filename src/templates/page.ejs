@@ -10,6 +10,7 @@
 		<link rel='stylesheet' href='/style.css'>
 	</head>
 	<body>
+		<img class='header' src='/header.svg' alt='How Did I Get Here: a project by Lexi Mattick and Hack Club'>
 		<section class='terminal'>
 			<div class='terminal-inner'>
 				<h1>ktr [v<%= pageGlobals.ktrVersion %>]</h1>
@@ -34,13 +35,13 @@
 			<% if (pageGlobals.paragraphs) { %>
 				<% for (const paragraph of pageGlobals.paragraphs) { %>
 					<p><%= paragraph %></p>
-					<% } %>
+				<% } %>
+				
+				<%- pageGlobals.staticTextHtml %>
 			<% } else { %>
 				<%# Should never get here, but, y'know, just in case... %>
 				<p>Running traceroute...</p>
 			<% } %>
-
-			<!-- <%- pageGlobals.staticTextHtml %> -->
 		</section>
 	</body>
 </html>
