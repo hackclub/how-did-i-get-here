@@ -283,7 +283,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				behind a VPN — so we just have to imagine its existence at the start of the traceroute.
 			`)
 			// Note: there can never be a second pending hop at the start of the traceroute, they're pruned beforehand.
-			firstSegment(portions.shift()!, false, false)
+			const nextPortion = portions.shift()
+			if (nextPortion) firstSegment(nextPortion, false, false)
 		} else { // Done
 			if (user.networkInfo?.network?.networkType === 'ISP') {
 				pushParagraph(`
@@ -301,7 +302,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			}
 			
 			if (portion.size === 0) { // Only first hop was in this portion
-				firstSegment(portions.shift()!, false, true)
+				const nextPortion = portions.shift()
+				if (nextPortion) firstSegment(nextPortion, false, true)
 			} else { // >= 1 remaining
 				firstSegment(portion, true, true)
 			}

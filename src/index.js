@@ -10,6 +10,7 @@ import fs from 'node:fs'
 import { nanoid } from 'nanoid'
 import { startKtrAgent, ktrVersion } from './ktr.js'
 import { generateText } from './text-engine.js'
+import { parse as renderMarkdown } from 'marked'
 
 const app = express()
 const router = AsyncRouter()
@@ -18,7 +19,8 @@ const ktr = startKtrAgent()
 const TEMPLATE_PATHS = {
 	page:         'src/templates/page.ejs',
 	updateStream: 'src/templates/update-stream.ejs',
-	traceroute:   'src/templates/traceroute.ejs'
+	traceroute:   'src/templates/traceroute.ejs',
+	staticTextMd: 'src/templates/static-text.md'
 }
 const TEMPLATE_SPLITS = {
 	tracerouteStream: '<!-- TRACEROUTE STREAM -->'
@@ -89,7 +91,7 @@ router.get('/', async (req, res) => {
 
 	// Get user IP
 	let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
-	if (userIp === 'localhost' || userIp === '::1') userIp = '76.76.21.21' // kognise.dev
+	if (userIp === 'localhost' || userIp === '::1' || userIp === '127.0.0.1') userIp = '76.76.21.21' // kognise.dev
 	userIp = userIp.replace(/^::ffff:/, '')
 
 	// Globals for EJS renders
@@ -99,8 +101,10 @@ router.get('/', async (req, res) => {
 		serverIp: SERVER_IP,
 		isoDate: new Date().toISOString(),
 		ktrVersion,
-		paragraphs: null
+		paragraphs: null,
+		staticTextHtml: '' // Filled below
 	}
+	pageGlobals.staticTextHtml = renderMarkdown(ejs.render(templates.staticTextMd, { pageGlobals }))
 
 	// Start trace
 	const trace = ktr.trace(userIp)
@@ -128,6 +132,7 @@ router.get('/', async (req, res) => {
 				}
 				return isTraceDone
 			} catch (error) {
+				clearInterval(refreshInterval)
 				console.error(error)
 				return false
 			}
