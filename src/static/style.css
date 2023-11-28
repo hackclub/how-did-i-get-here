@@ -45,7 +45,7 @@ img {
 
 .text {
 	font-family: 'Lato', sans-serif;
-	line-height: 1.6;
+	line-height: 1.65;
 	font-size: 1.1em;
 	margin: 0 calc(var(--terminal-padding));
 	margin-top: 32px;
@@ -101,13 +101,20 @@ h1 {
 	left: calc(var(--width) * -1 - 20px);
 }
 .landmark.you    { color: #ff6b6b; }
-.landmark.server { color: #339af0; }
+.landmark.server { color: #4dabf7; }
 
 h2, h3 {
 	margin-top: 40px;
-	margin-bottom: 16px;
+	margin-bottom: 14px;
 	color: #ffffff;
 }
+
+.text p {
+	margin: 16px 0;
+}
+
+a         { color: #4dabf7; }
+a:visited { color: #da77f2; }
 
 @media (max-width: 1050px) {
 	.landmark {
@@ -136,8 +143,4 @@ h2, h3 {
 
 @media (max-width: 400px) {
 	.asn { display: none; }
-}
-
-.text p {
-	margin-top: 16px;
 }
