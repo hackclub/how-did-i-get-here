@@ -19,12 +19,20 @@ body {
 	color: #ced4da;
 }
 
-.header {
+img {
 	display: block;
 	width: 100%;
+}
+
+.header {
 	max-width: 700px;
 	margin: 0 auto;
 	margin-bottom: 10px;
+}
+
+.divider {
+	max-width: calc(100% - 40px);
+	margin: 80px auto;
 }
 
 .terminal {

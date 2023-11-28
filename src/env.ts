@@ -17,3 +17,4 @@ export const SERVER_HOST = process.env.SERVER_HOST ?? 'localhost'
 export const SERVER_IP = process.env.SERVER_IP ?? '127.0.0.1'
 export const LINODE_ASN = 63949
 export const AKAMAI_ASN = 20940
+export const STUB_TRACEROUTE = process.env.STUB_TRACEROUTE === 'true'

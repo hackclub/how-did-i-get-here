@@ -2,12 +2,13 @@
 <html lang='en'>
 	<head>
 		<meta charset='utf-8'>
-		<title>Traceroute</title>
+		<title>How Did I Get Here?</title>
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel='preconnect' href='https://fonts.googleapis.com'>
 		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Lato&display=swap'>
 		<link rel='stylesheet' href='/style.css'>
+		<link rel='icon' href='/favicon.png'>
 	</head>
 	<body>
 		<img class='header' src='/header.svg' alt='How Did I Get Here: a project by Lexi Mattick and Hack Club'>
@@ -36,6 +37,8 @@
 				<% for (const paragraph of pageGlobals.paragraphs) { %>
 					<p><%= paragraph %></p>
 				<% } %>
+
+				<img class='divider' src='/divider.svg' role='separator' alt=''>
 				
 				<%- pageGlobals.staticTextHtml %>
 			<% } else { %>
