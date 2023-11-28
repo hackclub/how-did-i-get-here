@@ -44,7 +44,7 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 	// Improve hop info and prune multiple loading hops
 	for (let i = 0; i < update.hops.length; i++) {
 		const hop = update.hops[i]
-		if (!hop.hostname && hop.ip === pageGlobals.userIp) hop.hostname = 'your device'
+		// if (!hop.hostname && hop.ip === pageGlobals.userIp) hop.hostname = 'your device'
 
 		if (hop.kind === 'Pending' && update.hops[i + 1]?.kind === 'Pending') {
 			update.hops.splice(i, 1)

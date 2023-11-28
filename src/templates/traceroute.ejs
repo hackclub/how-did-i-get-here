@@ -33,11 +33,13 @@
 						</span>
 					<% } else if ((isTraceDone && i === 0) || hop.ip === pageGlobals.userIp) { %>
 						<div class='landmark you'>
-							You
-							<span class='hide-when-inline-landmark'>are here</span>
-							->
+							You are here
+							<span class='hide-when-inline-landmark'>-></span>
 						</div>
-						<%= hop.hostname ?? hop.ip %>
+
+						<span class='hide-when-inline-landmark'>
+							<%= hop.hostname ?? hop.ip %>
+						</span>
 					<% } else { %>
 						<%= hop.hostname ?? hop.ip %>
 					<% } %>
@@ -55,9 +57,9 @@
 						<% } %>
 					</div>
 				<% } else { %>
-					<div class='asn'></div>
-					<div class='network'></div>
-					<div class='country'></div>
+					<div class='asn'>...</div>
+					<div class='network'>...</div>
+					<div class='country'>...</div>
 				<% } %>
 			</li>
 		<% } %>
