@@ -43,7 +43,7 @@ body {
 	margin-top: 32px;
 }
 
-h1, .header, .pending {
+h1, .table-header, .pending {
 	font-weight: bold;
 	color: #e9ecef;
 }
