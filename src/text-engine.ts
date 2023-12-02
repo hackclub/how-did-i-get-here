@@ -200,6 +200,12 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
+	function areNamesSimilar(a: string, b: string): boolean {
+		return a.trim() === b.trim()
+			|| b.includes(a.trim())
+			|| a.includes(b.trim())
+	}
+
 	function firstSegment(portion: Portion, includesFirst: boolean, thatRouter: boolean) {
 		prevHop = portion.hops.at(-1)!
 		if (portion.key.networkInfo && portion.key.networkInfo.network) {
@@ -215,6 +221,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			text += portion.size === 1 ? 'a device ' : 'devices '
 			text += `in ${network.organization.name.trim()}'s `
 			text += uniqueNetworks.size === 1 ? 'network' : 'networks'
+			if (!areNamesSimilar(network.name, network.organization.name)) text += `, ${network.name.trim()}`
 			text += '. '
 
 			if (network.networkType === 'ISP') {
@@ -342,7 +349,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			let description
 			if (network) {
 				const [ netName, orgName ] = [ network.name.trim(), network.organization.name.trim() ]
-				if (netName === orgName) {
+				if (areNamesSimilar(netName, orgName)) {
 					prefix = `You took an intermediate jump through ${netName}`
 					description = describeNetworkType(network.networkType, true)
 				} else {

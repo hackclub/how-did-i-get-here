@@ -61,6 +61,17 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 		}
 	}
 
+	// Deduplicate sequential hops
+	for (let i = 0; i < update.hops.length - 1; i++) {
+		const hop = update.hops[i]
+		const nextHop = update.hops[i + 1]
+
+		if (hop.ip === nextHop.ip && hop.hostname === nextHop.hostname) {
+			update.hops.splice(i, 1)
+			i--
+		}
+	}
+
 	// Reverse hops
 	update.hops.reverse()
 
