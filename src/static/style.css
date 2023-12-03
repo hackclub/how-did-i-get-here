@@ -33,6 +33,7 @@ img {
 .divider {
 	max-width: 80px;
     margin: 80px auto;
+	margin-bottom: -20px;
 }
 
 .terminal {
@@ -46,7 +47,7 @@ img {
 .text {
 	font-family: 'Lato', sans-serif;
 	line-height: 1.65;
-	font-size: 1.1em;
+	font-size: 1.2em;
 	margin: 0 calc(var(--terminal-padding));
 	margin-top: 32px;
 }
@@ -104,13 +105,17 @@ h1 {
 .landmark.server { color: #4dabf7; }
 
 h2, h3 {
-	margin-top: 40px;
-	margin-bottom: 14px;
+	margin-top: 50px;
+	margin-bottom: -4px;
 	color: #ffffff;
 }
 
+h2 {
+	margin-top: 100px;
+}
+
 .text p {
-	margin: 16px 0;
+	margin: 20px 0;
 }
 
 a         { color: #4dabf7; }

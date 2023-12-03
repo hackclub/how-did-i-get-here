@@ -1,5 +1,3 @@
-Read onward for bonus content about how this website works.
-
 ## **Behind the Scenes**
 
 To reach this website, your computer sent some packets across the Internet. If we’re curious what that path was, we can run a tool to generate a *traceroute* — a rough list of every server your packets touched to reach their destination. To build this website, I wrote my own traceroute program called ktr ([source code is on GitHub](https://github.com/kognise/ktr)) that can stream results in real time while concurrently looking up interesting information about each hop.
