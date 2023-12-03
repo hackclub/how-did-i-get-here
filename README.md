@@ -1,7 +1,7 @@
 <div align='center'>
 <a href='https://how-did-i-get-here.net/'>
 <img width='700' src='src/static/header.svg' alt='How Did I Get Here? A project by Lexi Mattick and Hack Club'>
-<p><strong>See at how-did-i-get-here.net &raquo;</strong></p>
+<p><strong>Visit how-did-i-get-here.net &raquo;</strong></p>
 </a>
 </div>
 

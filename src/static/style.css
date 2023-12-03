@@ -7,7 +7,7 @@ body, h1, p, ol, li {
 
 body {
 	--terminal-padding: 24px;
-	--terminal-charwidth: 100ch;
+	--terminal-charwidth: 102ch;
 	padding: 40px 10px;
 	padding-top: 30px;
 	box-sizing: border-box;
@@ -91,7 +91,7 @@ h1 {
 
 .host    { flex: 1; }
 .asn     { max-width: 9ch;  flex: 1; }
-.network { max-width: 23ch; flex: 1; }
+.network { max-width: 25ch; flex: 1; }
 .country { max-width: 12ch; flex: 1; }
 
 .landmark {
