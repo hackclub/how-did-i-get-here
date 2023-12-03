@@ -67,7 +67,7 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 		const hop = update.hops[i]
 		const nextHop = update.hops[i + 1]
 
-		if (hop.ip === nextHop.ip && hop.hostname === nextHop.hostname) {
+		if (hop.ip === nextHop.ip) {
 			update.hops.splice(i, 1)
 			i--
 		}
