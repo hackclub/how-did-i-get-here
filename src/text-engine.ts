@@ -102,7 +102,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				break
 			}
 			case 'ISP': {
-				long = 'an internet service provider'
+				long = 'an Internet service provider'
 				short = 'ISP'
 				shortArticle = 'an'
 				shortSupportsAnother = true
