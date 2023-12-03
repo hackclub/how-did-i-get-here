@@ -62,6 +62,7 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 	}
 
 	// Deduplicate sequential hops
+	// TODO: This is a bug on the ktr side and should be fixed there.
 	for (let i = 0; i < update.hops.length - 1; i++) {
 		const hop = update.hops[i]
 		const nextHop = update.hops[i + 1]

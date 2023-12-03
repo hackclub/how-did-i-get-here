@@ -227,6 +227,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			if (network.networkType === 'ISP') {
 				networkTypeCounts['ISP']++
 				text += `That’s probably your ISP, responsible for connecting you to the Internet in exchange for money.`
+			} else if (network.networkType === 'NSP') {
+				networkTypeCounts['ISP']++ // Not a typo
+				text += `That’s either your ISP, responsible for connecting you to the Internet in exchange for money, or a company your Internet provider contracts.`
 			} else {
 				text += `
 					That’s the first network we have any info on; chances are whoever handles your Internet is paying them

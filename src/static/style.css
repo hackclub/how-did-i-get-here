@@ -31,8 +31,8 @@ img {
 }
 
 .divider {
-	max-width: calc(100% - 40px);
-	margin: 80px auto;
+	max-width: 80px;
+    margin: 80px auto;
 }
 
 .terminal {
