@@ -6,7 +6,7 @@ import semver from 'semver'
 import type { Command, ControllerResult, Network, Output } from './ktr-types.js'
 
 // Update this if when you add code relying on new ktr features
-const KTR_VERSION_SPEC = '^0.5.2'
+const KTR_VERSION_SPEC = '^0.5.3'
 
 export interface TraceEmitter extends EventEmitter {
 	on(event: 'update', listener: (update: ControllerResult) => void): this

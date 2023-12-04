@@ -118,6 +118,7 @@ router.get('/', async (req, res) => {
 		isoDate: new Date().toISOString().slice(0, -5),
 		ktrVersion,
 		paragraphs: null,
+		error: null,
 		logoSvg: templates.logoSvg,
 		essayHtml: '' // Rendered when traceroute is done
 	}
@@ -145,7 +146,12 @@ router.get('/', async (req, res) => {
 					res.write(html)
 					lastStreamId = streamId
 					if (isTraceDone) {
-						pageGlobals.paragraphs = generateText(cloned)
+						if (update.kind === 'TraceDone' && update.reason.kind === 'Error') {
+							pageGlobals.error = output.reason.error
+						} else {
+							pageGlobals.paragraphs = generateText(cloned)
+						}
+
 						res.end(ejs.render(afterSplit, { pageGlobals }))
 					}
 					return isTraceDone

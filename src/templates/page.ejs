@@ -42,10 +42,16 @@
 		</section>
 		
 		<section class='text'>
-			<% if (pageGlobals.paragraphs) { %>
+			<% if (pageGlobals.paragraphs || pageGlobals.error) { %>
 				<div class='generated'>
-					<% for (const paragraph of pageGlobals.paragraphs) { %>
-						<p><%= paragraph %></p>
+					<% if (pageGlobals.error) { %>
+						<p>Hey, sorry, my traceroute program was buggy or something and crashed when trying to generate this page for you. Below, you can still read an article about how this page would normally work.</p>
+						<p>Diagnostic information: <%= pageGlobals.error.message %> (<%= pageGlobals.error.kind %>)</p>
+						<p>You might be able to try again in a bit.</p>
+					<% } else { %>
+						<% for (const paragraph of pageGlobals.paragraphs) { %>
+							<p><%= paragraph %></p>
+						<% } %>
 					<% } %>
 				</div>
 
