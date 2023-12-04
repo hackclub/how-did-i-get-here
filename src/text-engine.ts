@@ -476,3 +476,77 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 	return paragraphs
 }
+
+export function generateEssayTracerouteInfo(hops: Hop[]) {
+	const hopAsns = hops.map(hop => hop.kind === 'Done' ? hop.networkInfo?.asn ?? null : null)
+
+	// Remove unknown ASNs in gaps and calculate frequency of different networks
+	const frequency: Record<number, number> = {}
+	for (let i = 0; i < hopAsns.length; i++) {
+		const [ first, middle, last ] = hopAsns.slice(i, i + 3)
+		if (!first) continue
+
+		if (first === last && !middle) {
+			hopAsns.splice(i + 1, 1)
+			i--
+			continue
+		}
+
+		frequency[first] = (frequency[first] ?? 0) + 1
+	}
+
+	// Get ASN with highest frequency
+	let highestFrequency = 0
+	let highestFrequencyAsn: number | null = null
+	for (const [ asn, freq ] of Object.entries(frequency)) {
+		// if (Number(asn) === LINODE_ASN || Number(asn) === AKAMAI_ASN) continue
+		if (freq > highestFrequency) {
+			highestFrequency = freq
+			highestFrequencyAsn = Number(asn)
+		}
+	}
+
+	// Find the network info of that ASN
+	let highestFrequencyNetworkInfo: NetworkInfo | null = null
+	for (const hop of hops) {
+		if (hop.kind === 'Done' && hop.networkInfo?.asn === highestFrequencyAsn) {
+			highestFrequencyNetworkInfo = hop.networkInfo
+			break
+		}
+	}
+	const cardinals = [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine' ]
+	const showHighestFrequencyNetwork = highestFrequency >= 2
+	const highestFrequencyNetworkName = highestFrequencyNetworkInfo?.network?.name.trim() ?? ('AS' + highestFrequencyAsn)
+	const highestFrequencyNetworkCount = (highestFrequency <= 3 ? 'the ' : 'all ')
+		+ (cardinals[highestFrequency - 1] ?? highestFrequency.toString())
+
+	// Deduplicate
+	for (let i = 0; i < hopAsns.length - 1; i++) {
+		if (hopAsns[i] === hopAsns[i + 1]) {
+			hopAsns.splice(i, 1)
+			i--
+		}
+	}
+
+	// Remove nulls from the start or end
+	if (!hopAsns[0]) hopAsns.shift()
+	if (!hopAsns.at(-1)) hopAsns.pop()
+	
+	const hopAsnStrings = hopAsns.map(asn => asn ? 'AS' + asn : '(???)')
+	
+	let connection: [string, string] | null = null
+	for (let i = 0; i < hopAsns.length - 1; i++) {
+		if (hopAsns[i] && hopAsns[i + 1]) {
+			connection = [ 'AS' + hopAsns[i], 'AS' + hopAsns[i + 1] ]
+			break
+		}
+	}
+
+	return {
+		hopAsnStrings,
+		connection,
+		showHighestFrequencyNetwork,
+		highestFrequencyNetworkName,
+		highestFrequencyNetworkCount
+	}
+}

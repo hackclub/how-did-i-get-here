@@ -6,12 +6,19 @@
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<link rel='preconnect' href='https://fonts.googleapis.com'>
 		<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Lato:wght@400;700&display=swap'>
+		<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Roboto+Slab:wght@700&family=Source+Serif+4:ital@0;1&display=swap'>
 		<link rel='stylesheet' href='/style.css'>
 		<link rel='icon' href='/favicon.png'>
 		<script defer data-domain='how-did-i-get-here.net' src='https://plausible.io/js/script.js'></script>
 	</head>
 	<body>
+		<!-- This is not my beautiful house. -->
+		<!-- This is not my beautiful wife.  -->
+
+		<a class='orpheus-flag' target='_blank' href='https://hackclub.com/'>
+			<img src='/orpheus-flag.svg' width='560' height='315' alt='A project by Hack Club' title='A project by Hack Club' />
+		</a>
+
 		<img class='header' src='/header.svg' alt='How Did I Get Here: a project by Lexi Mattick and Hack Club'>
 		<section class='terminal'>
 			<div class='terminal-inner'>
@@ -35,13 +42,15 @@
 		
 		<section class='text'>
 			<% if (pageGlobals.paragraphs) { %>
-				<% for (const paragraph of pageGlobals.paragraphs) { %>
-					<p><%= paragraph %></p>
-				<% } %>
+				<div class='generated'>
+					<% for (const paragraph of pageGlobals.paragraphs) { %>
+						<p><%= paragraph %></p>
+					<% } %>
+				</div>
 
 				<img class='divider' src='/divider.svg' role='separator' alt=''>
 				
-				<%- pageGlobals.staticTextHtml %>
+				<%- pageGlobals.essayHtml %>
 			<% } else { %>
 				<%# Should never get here, but, y'know, just in case... %>
 				<p>Running traceroute...</p>
