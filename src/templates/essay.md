@@ -1,6 +1,6 @@
 ## Behind the Scenes
 
-To reach this website, your computer sent some packets across the Internet. If we’re curious what that path was, we can run a tool to generate a *traceroute* — a rough list of every server your packets touched to reach their destination. To build this website ([source code on GitHub](https://github.com/hackclub/how-did-i-get-here)), I wrote my own traceroute program called ktr ([also open-source](https://github.com/kognise/ktr)) that can stream results in real time while concurrently looking up interesting information about each hop.
+To reach this website, your computer sent some packets across the Internet. If we’re curious what that path was, we can run a tool to generate a *traceroute* — a rough list of every server your packets touched to reach their destination. To build this website ([source code on GitHub](https://github.com/hackclub/how-did-i-get-here)), I wrote my own traceroute program called ktr ([also open source](https://github.com/kognise/ktr)) that can stream results in real time while concurrently looking up interesting information about each hop.
 
 How does ktr work? Let’s start with a simplified explanation of Internet routing.
 
@@ -20,7 +20,7 @@ You may have noticed that the traceroute progressively loads in lines above the 
 
 ### Front to Back, Back to Front
 
-My claim that this website’s traceroute was the path your packets took to reach our servers was a bit of a white lie. To calculate that, I would’ve had to be able to run a traceroute to my server *from your computer.* Instead, I ran the traceroute from my server to your computer and just reversed it. That’s also why the traceroute at the top seemingly loads in reverse order.
+My claim that this website’s traceroute was the path your packets took to reach my server was a bit of a white lie. To calculate that, I would’ve had to be able to run a traceroute to my server *from your computer.* Instead, I ran the traceroute from my server to your computer and just reversed it. That’s also why the traceroute at the top seemingly loads in reverse order.
 
 Does running a “reverse traceroute” sacrifice accuracy? A little, actually.
 
@@ -50,7 +50,7 @@ I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to
 
 (All <span class='generated'>light green colored text</span> was generated dynamically when you loaded this page.)
 
-WHOIS is actually an... interesting protocol to make a parser for. It turns out that the [WHOIS protocol specification](https://datatracker.ietf.org/doc/html/rfc3912/) doesn't actually specify much. It only specifies that you should make a TCP connection to the WHOIS server, send whatever you want to look up, and the server will send back some info and then terminate the connection.
+WHOIS is actually an... interesting protocol to make a parser for. It turns out that the [WHOIS protocol specification](https://datatracker.ietf.org/doc/html/rfc3912/) doesn't actually specify much. It specifies that you should make a TCP connection to the WHOIS server, send whatever you want to look up, and the server will send back some info and then terminate the connection. That's all.
 
 And yet, a lot of WHOIS servers will respond with structured-seeming information:
 
@@ -72,11 +72,11 @@ BGP is the protocol that gives the Internet its shape, and you [can’t directly
 
 In 1969, the same year Neil Armstrong landed on the moon, a message was (partially) sent on a prototype of the ARPANET. Over the next 20 years, this “network of interconnected computers” thing got pretty popular and everyone wanted on the train. Various universities, government agencies, and a couple random companies started making networks of their computers left and right.
 
-A couple of these organizations started connecting their networks together so they could share data more easily. The Internet as we know it didn’t exist yet, but these network interconnections were getting out of hand and there wasn’t a great standard for coordinating them. In 1989, engineers at Cisco and IBM published RFC 1105, describing the first ever version of BGP.
+A couple of these organizations started connecting their networks together so they could share data more easily. The Internet as we know it didn’t exist yet, but these network interconnections were getting out of hand and there wasn’t a great standard for coordinating them. In 1989, engineers at Cisco and IBM published [RFC 1105](https://datatracker.ietf.org/doc/html/rfc1105/), describing the first ever version of BGP.
 
-Over the next couple of years, interconnected-network people got really busy as “the Internet” rapidly became a thing. Just one year after the BGP v1 RFC, Cisco went public and brought a lot of money into the networking industry, the term “IANA” was first used to refer to the [random guy](https://en.wikipedia.org/wiki/Jon_Postel) and his college department that were keeping track of numbers on the Internet, ARPANET shut down for good, and BGP v2 was released.
+Over the next couple of years, interconnected-network people got really busy as “the Internet” rapidly became a thing. Just one year after the BGP v1 RFC, Cisco went public and brought a lot of money into the networking industry, the term “IANA” was first used to refer to the [random guy](https://en.wikipedia.org/wiki/Jon_Postel) and his college department that were keeping track of numbers on the Internet, ARPANET shut down for good, and [BGP v2](https://datatracker.ietf.org/doc/html/rfc1163) was released.
 
-In 1994, as the Internet-is-a-thing-now whirlwind was just beginning to calm, the final major version of BGP, v4, was specified in RFC 1654. It was revised twice (in 1995 and 2006) and got some patches, but BGP v4 is still the protocol we use for choosing routes across the interconnected networks that make up the modern Internet.
+In 1994, as the Internet-is-a-thing-now whirlwind was just beginning to calm, the final major version of BGP, v4, was specified in [RFC 1654](https://datatracker.ietf.org/doc/html/rfc1654). It was revised twice (in [1995](https://datatracker.ietf.org/doc/html/rfc1771) and [2006](https://datatracker.ietf.org/doc/html/rfc4271)) and got some patches, but BGP v4 is still the protocol we use for choosing routes across the interconnected networks that make up the modern Internet.
 
 ### How Does This BGP Thing Work?
 
@@ -132,13 +132,18 @@ Thanks to the encouragement of my friends at Hack Club, I made the best out of w
 
 I hope this serves as another fun, informative, and well-crafted thing on the web that can last, be shared around, and inspire people.
 
+With love,  
+Lexi
+
+### Other Stuff
+
 Some things to check out:
 
-- [Other stuff I've written in the past](https://kognise.dev/writing)
+- [Writing I've done in the past](https://kognise.dev/writing)
 - [Hack Club, the best community if you're a young person](https://hackclub.com/)
 
-Proudly open-source:
+Proudly open source:
 
 - [This website’s source code](https://github.com/hackclub/how-did-i-get-here)
 - [My traceroute program’s source code](https://github.com/kognise/ktr)
-- [Public Figma of any art on this website](https://www.figma.com/community/file/1260699047973407903/article-diagrams)
+- [Public Figma of all art on this website](https://www.figma.com/community/file/1260699047973407903/article-diagrams)

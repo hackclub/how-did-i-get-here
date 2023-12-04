@@ -50,7 +50,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
-	console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
+	// console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
 
 	// Yeet the last portion into its own variable
 	const lastHops = portions.pop()!.hops
@@ -232,7 +232,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				text += `That’s either your ISP, responsible for connecting you to the Internet in exchange for money, or a company your Internet provider contracts.`
 			} else {
 				text += `
-					That’s the first network we have any info on; chances are whoever handles your Internet is paying them
+					That’s the first network I have any info on; chances are whoever handles your Internet is paying them
 					for Internet access or they're your VPN provider.
 				`
 			}
@@ -257,7 +257,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	function clarifyHostname(hop: Hop_Done) {
 		if (didClarifyHostname) return
 		pushParagraph(`
-			(By the way, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking our DNS server
+			(By the way, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking my DNS server
 			if there’s any name associated with the IP, ${hop.ip}. Since there was, I used the “pretty” human-readable
 			name instead of the numbers. Reverse DNS names are usually just designed to make debugging easier, and often
 			don’t even map back to the original IP.)
@@ -432,7 +432,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				${prefix}, you needed to leave the realm of ${prevNetworkName}
 				to reach my server. You went through Akamai’s network (AS${AKAMAI_ASN}) — they’re a large CDN with
 				many points of presence on the Internet, so it makes sense that you might get routed through them.
-				That said, Akamai also bought Linode (our server provider) a couple of years back, so it makes sense
+				That said, Akamai also bought Linode (my server provider) a couple of years back, so it makes sense
 				that they would set themselves up as a good path to Linode’s network.
 			`)
 
@@ -457,7 +457,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 			pushParagraph(`
 				${prefix}, you ended up at ${lastHops[0].hostname ?? lastHops[0].ip}, your entrypoint to Linode’s network.
-				From there, you were bounced around Linode’s internal network a bit before finally reaching our server.
+				From there, you were bounced around Linode’s internal network a bit before finally reaching my server.
 			`)
 			if (lastHops[0].hostname) clarifyHostname(lastHops[0])
 		} else {
@@ -469,7 +469,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			pushParagraph(`
 				${prefix}, we have ${didClarifyNoResponse ? 'another' : 'a'} probe that didn't respond.
 				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Linode's network.
-				From there, you were bounced around Linode’s internal network a bit before finally reaching our server.
+				From there, you were bounced around Linode’s internal network a bit before finally reaching my server.
 			`)
 		}
 	}
@@ -478,22 +478,13 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 }
 
 export function generateEssayTracerouteInfo(hops: Hop[]) {
-	const hopAsns = hops.map(hop => hop.kind === 'Done' ? hop.networkInfo?.asn ?? null : null)
+	const hopAsns = hops
+		.map(hop => hop.kind === 'Done' ? hop.networkInfo?.asn ?? null : null)
+		.filter(asn => asn !== null) as number[]
 
-	// Remove unknown ASNs in gaps and calculate frequency of different networks
+	// Calculate frequency of different networks
 	const frequency: Record<number, number> = {}
-	for (let i = 0; i < hopAsns.length; i++) {
-		const [ first, middle, last ] = hopAsns.slice(i, i + 3)
-		if (!first) continue
-
-		if (first === last && !middle) {
-			hopAsns.splice(i + 1, 1)
-			i--
-			continue
-		}
-
-		frequency[first] = (frequency[first] ?? 0) + 1
-	}
+	for (let i = 0; i < hopAsns.length; i++) frequency[hopAsns[i]] = (frequency[hopAsns[i]] ?? 0) + 1
 
 	// Get ASN with highest frequency
 	let highestFrequency = 0
@@ -527,12 +518,8 @@ export function generateEssayTracerouteInfo(hops: Hop[]) {
 			i--
 		}
 	}
-
-	// Remove nulls from the start or end
-	if (!hopAsns[0]) hopAsns.shift()
-	if (!hopAsns.at(-1)) hopAsns.pop()
 	
-	const hopAsnStrings = hopAsns.map(asn => asn ? 'AS' + asn : '(???)')
+	const hopAsnStrings = hopAsns.map(asn => 'AS' + asn)
 	
 	let connection: [string, string] | null = null
 	for (let i = 0; i < hopAsns.length - 1; i++) {

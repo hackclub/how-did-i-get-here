@@ -42,7 +42,6 @@ export function startKtrAgent() {
 
 	const splitter = split(JSON.parse, undefined, { trailing: false /* don't crash on EOF, we handle it in "exit" event */ })
 	agent.stdout.pipe(splitter).on('data', (output: Output) => {
-		console.log('hi', output)
 		if (output.kind === 'StartedTrace') {
 			startedTraces[output.commandId]?.(output.traceId)
 		} else if (output.kind === 'LookupAsnResult') {
