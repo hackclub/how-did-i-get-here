@@ -20,7 +20,8 @@ const TEMPLATE_PATHS = {
 	page:         'src/templates/page.ejs',
 	updateStream: 'src/templates/update-stream.ejs',
 	traceroute:   'src/templates/traceroute.ejs',
-	staticTextMd: 'src/templates/static-text.md'
+	staticTextMd: 'src/templates/static-text.md',
+	logoSvg:      'src/static/logo.svg'
 }
 const TEMPLATE_SPLITS = {
 	tracerouteStream: '<!-- TRACEROUTE STREAM -->'
@@ -114,6 +115,7 @@ router.get('/', async (req, res) => {
 		isoDate: new Date().toISOString(),
 		ktrVersion,
 		paragraphs: null,
+		logoSvg: templates.logoSvg,
 		staticTextHtml: '' // Filled below
 	}
 	pageGlobals.staticTextHtml = renderMarkdown(ejs.render(templates.staticTextMd, { pageGlobals }))

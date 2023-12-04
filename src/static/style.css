@@ -30,13 +30,10 @@ img {
 	margin-bottom: 10px;
 }
 
-.header text, .header a {
-	fill: white;
-}
-
-.header a:hover {
-	fill: rgb(48, 190, 56);
-	text-decoration: underline;
+.header svg {
+	display: block;
+	width: 100%;
+	height: auto;
 }
 
 .divider {
