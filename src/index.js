@@ -20,8 +20,12 @@ const TEMPLATE_PATHS = {
 	page:         'src/templates/page.ejs',
 	updateStream: 'src/templates/update-stream.ejs',
 	traceroute:   'src/templates/traceroute.ejs',
+<<<<<<< HEAD
 	essayMd:      'src/templates/essay.md',
 	logoSvg:      'src/static/logo.svg'
+=======
+	essayMd:      'src/templates/essay.md'
+>>>>>>> 6dc841f9108b09d8a8608cab895972d5a5ca4509
 }
 const TEMPLATE_SPLITS = {
 	tracerouteStream: '<!-- TRACEROUTE STREAM -->'
@@ -118,7 +122,10 @@ router.get('/', async (req, res) => {
 		isoDate: new Date().toISOString().slice(0, -5),
 		ktrVersion,
 		paragraphs: null,
+<<<<<<< HEAD
 		logoSvg: templates.logoSvg,
+=======
+>>>>>>> 6dc841f9108b09d8a8608cab895972d5a5ca4509
 		essayHtml: '' // Rendered when traceroute is done
 	}
 
