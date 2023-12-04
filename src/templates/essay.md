@@ -36,15 +36,29 @@ Each network, also called an autonomous system (AS), is a collection of routers 
 
 The Internet is often described as an open, almost anarchistic network connecting computers, some owned by people like you and me, and some owned by companies. In reality, the Internet is a network of corporation-owned networks, access and control to which is governed by financial transactions and dripping with bureaucracy.
 
-If you want your own autonomous system, you can apply for an autonomous system number (ASN) with one of the five [Regional Internet Registries (RIRs)](https://en.wikipedia.org/wiki/Regional_Internet_registry) that govern the Internet’s numbers. Be warned, they probably won’t listen to you if you aren’t backed by a company or you don’t have enough points of presence on the Internet. Just like we use IP addresses to identify—
+If you want your own autonomous system, you can apply for an autonomous system number (ASN) with one of the five [regional Internet registries (RIRs)](https://en.wikipedia.org/wiki/Regional_Internet_registry) that govern the Internet’s numbers. Be warned, they probably won’t listen to you if you aren’t backed by a company or you don’t have enough points of presence on the Internet. Just like we use IP addresses to identify—
 
 *Wait, what exactly do IP addresses identify? Uh… let’s say they represent devices with Internet access.*
 
-… Just like we use [IP addresses](https://en.wikipedia.org/wiki/IP_address) to identify devices with Internet access, we use ASNs to identify the networks of the Internet. <% if (tracerouteInfo.hopAsnStrings[0]) { %><span class='generated'>Those are the numbers like "<%= tracerouteInfo.hopAsnStrings[0] %>" in the traceroute from the start.</span><% } %>
+… Just like we use [IP addresses](https://en.wikipedia.org/wiki/IP_address) to identify devices with Internet access, we use ASNs to identify the networks of the Internet. <% if (tracerouteInfo.hopAsnStrings[0]) { %><span class='generated'>Those are the numbers like &ldquo;<%= tracerouteInfo.hopAsnStrings[0] %>&rdquo; in the traceroute from the start.</span><% } %>
 
-One of the reasons I wrote a cool traceroute program myself is so I could pull information on which autonomous systems own the IPs along your traceroute. A couple of organizations try to keep track of which ASes contain which IP addresses. Many of them let you perform ASN lookups using the [WHOIS protocol](https://en.wikipedia.org/wiki/WHOIS), so I wrote a small client to parse the responses from some servers I arbitrarily selected. I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to figure out the companies behind the ASNs; PeeringDB has information on about 1/3rd of all autonomous systems. I used all of this information, alongside a couple hundred lines of if statements, to generate the text about network traversal for you.
+### Notes on WHOIS
+
+One of the reasons I wrote a cool traceroute program myself is so I could pull information on which autonomous systems own the IPs along your traceroute. A couple of organizations try to keep track of which ASes contain which IP addresses. Many of them let you perform ASN lookups using the [WHOIS protocol](https://en.wikipedia.org/wiki/WHOIS), so I wrote a small client to parse the responses from some servers I arbitrarily selected.
+
+I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to figure out the companies behind the ASNs; PeeringDB has information on about 1/3rd of all autonomous systems. I used all of this information, alongside a couple hundred lines of if statements, to generate the text about network traversal for you.
 
 (All <span class='generated'>light green colored text</span> was generated dynamically when you loaded this page.)
+
+WHOIS is actually an... interesting protocol to make a parser for. It turns out that the [WHOIS protocol specification](https://datatracker.ietf.org/doc/html/rfc3912/) doesn't actually specify much. It only specifies that you should make a TCP connection to the WHOIS server, send whatever you want to look up, and the server will send back some info and then terminate the connection.
+
+And yet, a lot of WHOIS servers will respond with structured-seeming information:
+
+<img src='/whois-screenshot.png' width='942' height='716' alt='Screenshot of a Terminal app. Command was run: whois 198.58.104.130. Results are structured text, starting with a percent sign and the text "IANA WHOIS server."'>
+
+It turns out this structure is made up by the WHOIS server administrator and there just happen to be some shared conventions between servers. Even with the level of structure, the fields you want often show up with different names (origin? originas?) or even under multiple places at once.
+
+My &ldquo;parser&rdquo; ended up as less of a parser and more as a lightweight simulator of how I, a human, might read through WHOIS results to find the ASN I need.
 
 ## BGP
 
@@ -92,7 +106,7 @@ To route a packet to a certain IP, a border gateway first searches its routing t
 In the traceroute at the start, the AS path your packets ended up taking was <%= tracerouteInfo.hopAsnStrings.join(' → ') %>. That means, for example, that at some point your packet reached one of <%= tracerouteInfo.connection[0] %>'s routers that was peered with one of <%= tracerouteInfo.connection[1] %>’s routers, the router looked at its routing table and saw that the destination IP was reachable via some route starting with <%= tracerouteInfo.connection[1] %>, and sent your packet onward to that connected router.
 
 <% if (tracerouteInfo.showHighestFrequencyNetwork) { %>
-There were a couple of hops within the same ASN; look at <%= tracerouteInfo.highestFrequencyNetworkCount %> going through <%= tracerouteInfo.highestFrequencyNetworkName %>. Traceroutes do show us *every* router your packet goes between, not just the ones bordering autonomous systems. If routers know an efficient path through their internal network, they’ll often override the BGP route with that. Those internal paths might be learned through some sort of internal version of BGP, some other internal routing protocol, or just hardcoded.
+There were a couple of hops within the same ASN; look at <%= tracerouteInfo.highestFrequencyNetworkCount %> going through <%= tracerouteInfo.highestFrequencyNetworkName %>. Traceroutes do show us *every* router your packet goes between, not just the ones bordering autonomous systems. If routers know an efficient path through their internal network, they’ll often override the external BGP route with that. Those internal paths might be learned through an internal version of BGP, another internal routing protocol, or just hardcoded.
 
 Those internal hops are not very important to understanding how the Internet works. Only the peering arrangements between different autonomous systems decide reachability.
 <% } %>
@@ -100,10 +114,19 @@ Those internal hops are not very important to understanding how the Internet wor
 </div>
 <% } %>
 
+## Recap
+
+- When you loaded this website, it used my custom traceroute program to run a traceroute to your public IP, stream that over HTTP, and then render a textual explanation of the traceroute.
+
+- A traceroute depicts the path of routers traversed between two devices on the Internet. My particular implementation works by sending ICMP packets with increasing TTL fields.
+
+- These routers are in networks called autonomous systems. Routers on the edges of these ASes peer with each other using BGP. Border routers use BGP to share their routing tables with each other, and then use this knowledge to make routing decisions.
+
+- BGP peering sessions are created according to (often private) arrangements between the owners of autonomous systems. Since traffic can only pass between peered networks, these arrangements are the sole governor of reachability on the Internet.
+
 ## Epilogue
 
 I was frustrated with the state of understanding on the structure of the Internet and seeked to write a comprehensive, interactive article covering its history and politics through the lens of protocols. However, I got caught up in a lot of complexity in life and, facing tight deadlines, didn't have the time to reach the lofty goals I had set for myself.
-
 
 Thanks to the encouragement of my friends at Hack Club, I made the best out of what I had. &ldquo;Better to ship a tiny raft than never ship that cruise yacht!&rdquo; If nothing else, I got to make use of the sick ass traceroute program that powers the shiniest part of this site :)
 
