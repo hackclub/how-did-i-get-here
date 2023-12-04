@@ -16,7 +16,7 @@ This page will work perfectly fine with JavaScript disabled. From the browser’
 
 When you loaded this website, my program received a HTTP request coming from your IP address. It immediately started running a traceroute to your IP. Then, the server started responding to the HTTP request: it sent the beginning of this web page, and then it left the connection open. As ktr, my traceroute program, gave the server updates on your traceroute, it rendered the relevant HTML and sent it to your computer. When the traceroute finished, the server generated all the text and sent the rest of the website along the line before closing out the connection.
 
-You may have noticed that the traceroute progressively loads in lines above the bottom line. Normally, web pages can only load forward. Since I didn’t want to use any JavaScript, I did the hackiest thing possible: every time I update the traceroute display, I embed a CSS block that hides the previous iteration! Since browsers render CSS as the page is loading, this made it look like the traceroute was being edited over time.
+You may have noticed that the traceroute progressively loads in lines above the bottom line. Web pages can only load forward. Since I didn’t want to use any JavaScript, I did the hackiest thing possible: every time I update the traceroute display, I embed a CSS block that hides the previous iteration! Since browsers render CSS as the page is loading, this made it look like the traceroute was being edited over time.
 
 ### Front to Back, Back to Front
 
@@ -40,9 +40,11 @@ If you want your own autonomous system, you can apply for an autonomous system n
 
 *Wait, what exactly do IP addresses identify? Uh… let’s say they represent devices with Internet access.*
 
-… Just like we use [IP addresses](https://en.wikipedia.org/wiki/IP_address) to identify devices with Internet access, we use ASNs to identify the networks of the Internet. Those are the numbers like “AS63949” in the traceroute from the start.
+… Just like we use [IP addresses](https://en.wikipedia.org/wiki/IP_address) to identify devices with Internet access, we use ASNs to identify the networks of the Internet. <% if (tracerouteInfo.hopAsnStrings[0]) { %><span class='generated'>Those are the numbers like "<%= tracerouteInfo.hopAsnStrings[0] %>" in the traceroute from the start.</span><% } %>
 
-One of the reasons I wrote a cool traceroute program myself is so I could pull information on which autonomous systems own the IPs along your traceroute. There are a couple of organizations that try to keep track of which ASes contain which IP addresses. Many of them let you perform ASN lookups using the [WHOIS protocol](https://en.wikipedia.org/wiki/WHOIS), so I wrote a small client to parse the responses from some servers I arbitrarily selected. I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to figure out the companies behind the ASNs; PeeringDB has information on about 1/3rd of all autonomous systems. I used all of this information to generate the text about network traversal for you.
+One of the reasons I wrote a cool traceroute program myself is so I could pull information on which autonomous systems own the IPs along your traceroute. A couple of organizations try to keep track of which ASes contain which IP addresses. Many of them let you perform ASN lookups using the [WHOIS protocol](https://en.wikipedia.org/wiki/WHOIS), so I wrote a small client to parse the responses from some servers I arbitrarily selected. I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to figure out the companies behind the ASNs; PeeringDB has information on about 1/3rd of all autonomous systems. I used all of this information, alongside a couple hundred lines of if statements, to generate the text about network traversal for you.
+
+(All <span class='generated'>light green colored text</span> was generated dynamically when you loaded this page.)
 
 ## BGP
 
@@ -74,31 +76,46 @@ These routes across the Internet are formed by *peering relationships* between a
 
 Example time! Router A of AS0001 is physically connected with Router B of AS0002 and they want to peer with each other. They send BGP messages to each other to establish a *BGP session*. Router A now knows that it should go through Router B for any BGP route that starts with AS0002, and vice versa.
 
+<img src='/networks-example.svg' width='380' height='308' style='max-width: 440px; margin: 40px auto;'>
+
 BGP peers share the routes they know about with each other in a process called *route advertisement*. In our above example, when Router A connects to Router B, it would tell Router B “hey, here are all the routes I know about, you can go through my ASN (and by extension, me) to reach all of them.” Router B adds all of those routes through Router A — so, starting with AS0001 — to its routing table. Whenever another one of Router A’s peers advertises a new route, Router A will advertise those forward to Router B.
 
-AS0001 probably directly controls some IP addresses itself. Router A would advertise those to Router B as well. Router B would then, in turn, advertise those direct routes forward, telling all of *its* peers that AS0002 -\> AS0001 is a valid route to reach those IPs. Through this process of forwarding route advertisements to peers, BGP routes are propagated across the entire network of autonomous systems such that any border gateway hopefully knows one or multiple AS paths to reach any IP on the Internet.
+AS0001 probably directly controls some IP addresses itself. Router A would advertise those to Router B as well. Router B would then, in turn, advertise those direct routes forward, telling *its* peers that AS0002 → AS0001 is a valid route to reach those IPs. Through this process of forwarding route advertisements to peers, BGP routes are propagated across the entire network of autonomous systems such that any border gateway hopefully knows one or multiple AS paths to reach any IP on the Internet.
 
 To route a packet to a certain IP, a border gateway first searches its routing table for every route that would bring it to an AS that controls that IP. The router then picks the “best” route by [various heuristics](https://en.wikipedia.org/wiki/Border_Gateway_Protocol#Route_selection_process) that include looking for the shortest path and weighing hardcoded preferences for or against certain autonomous systems. Finally, it routes the packet to the first AS in that path by sending it to that AS’s gateway router which it is peered with. That router, in turn, looks at its own routing table and makes its own decision about where to send the packet next.
 
+<% if (tracerouteInfo.connection) { %>
 ### Traceroute Retrospective
 
-[tbd: generate this automatically]
+<div class='generated'>
 
-In the traceroute at the start, the AS path your packets ended up taking was AS7922 -\> AS20940 -\> AS63949. That means, for example, that at some point your packet reached one of AS7922’s routers that was peered with one of AS20940’s routers, the router looked at its routing table and saw that the destination IP was reachable via some route starting with AS20940, and sent your packet onward to that connected router.
+In the traceroute at the start, the AS path your packets ended up taking was <%= tracerouteInfo.hopAsnStrings.join(' → ') %>. That means, for example, that at some point your packet reached one of <%= tracerouteInfo.connection[0] %>'s routers that was peered with one of <%= tracerouteInfo.connection[1] %>’s routers, the router looked at its routing table and saw that the destination IP was reachable via some route starting with <%= tracerouteInfo.connection[1] %>, and sent your packet onward to that connected router.
 
-There were a couple of hops within the same ASN; look at all five going through Comcast - New England. Traceroutes do show us *every* router your packet goes between, not just the ones bordering autonomous systems. If routers know an efficient path through their internal network, they’ll often override the BGP route with that. Those internal paths might be learned through some sort of internal version of BGP, some other internal routing protocol, or just hardcoded.
+<% if (tracerouteInfo.showHighestFrequencyNetwork) { %>
+There were a couple of hops within the same ASN; look at <%= tracerouteInfo.highestFrequencyNetworkCount %> going through <%= tracerouteInfo.highestFrequencyNetworkName %>. Traceroutes do show us *every* router your packet goes between, not just the ones bordering autonomous systems. If routers know an efficient path through their internal network, they’ll often override the BGP route with that. Those internal paths might be learned through some sort of internal version of BGP, some other internal routing protocol, or just hardcoded.
 
 Those internal hops are not very important to understanding how the Internet works. Only the peering arrangements between different autonomous systems decide reachability.
+<% } %>
+
+</div>
+<% } %>
 
 ## Epilogue
 
-I was frustrated with the state of understanding on the structure of the Internet and seeked to write a comprehensive, interactive article covering its history and politics through the lens of protocols. However, I got caught up in a lot of complexity in life and, facing tight deadlines, did not have enough time to finish.
+I was frustrated with the state of understanding on the structure of the Internet and seeked to write a comprehensive, interactive article covering its history and politics through the lens of protocols. However, I got caught up in a lot of complexity in life and, facing tight deadlines, didn't have the time to reach the lofty goals I had set for myself.
 
-Thanks to the encouragement of my friends at Hack Club, I made the best out of what I had. If nothing else, I got to make use of the sick ass traceroute program that powers the shiniest part of this project :)
 
-Check out:
+Thanks to the encouragement of my friends at Hack Club, I made the best out of what I had. &ldquo;Better to ship a tiny raft than never ship that cruise yacht!&rdquo; If nothing else, I got to make use of the sick ass traceroute program that powers the shiniest part of this site :)
+
+I hope this serves as another fun, informative, and well-crafted thing on the web that can last, be shared around, and inspire people.
+
+Some things to check out:
 
 - [Other stuff I've written in the past](https://kognise.dev/writing)
 - [Hack Club, the best community if you're a young person](https://hackclub.com/)
+
+Proudly open-source:
+
 - [This website’s source code](https://github.com/hackclub/how-did-i-get-here)
 - [My traceroute program’s source code](https://github.com/kognise/ktr)
+- [Public Figma of any art on this website](https://www.figma.com/community/file/1260699047973407903/article-diagrams)

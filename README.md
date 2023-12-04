@@ -15,7 +15,7 @@ The traceroute and all lookups are powered by a custom traceroute library and ag
 
 ![](https://doggo.ninja/kv6l4b.png)
 
-I tried to use Bun for this, but Node HTTP socket support wasn't comprehensive enough, so I ported it bak to plain old Node with TypeScript. This always seems to happen. I am still using Bun as a package manager, though, thus the bun.lockb! I chose to do a hybrid approach (read: I developed this willy-nilly) wherein the complex, reliable code is all TypeScript, but the entrypoint is actually a JavaScript file that can do wibbly wobbly object manipulation with no trouble!
+I tried to use Bun for this, but Node HTTP socket support wasn't comprehensive enough, so I ported it back to plain old Node with TypeScript. This always seems to happen. I am still using Bun as a package manager, though, thus the bun.lockb! I chose to do a hybrid approach (read: I developed this willy-nilly) wherein the complex, reliable code is all TypeScript, but the entrypoint is actually a JavaScript file that can do wibbly wobbly object manipulation with no trouble!
 
 My approach to HTTP streaming is sorta cheating. It sends the first half of a page rendered with EJS (before a comment used to split it). Then, it streams another EJS fragment over and over again, separated by a style tag that hides the previous fragment with CSS. When the traceroute is finished streaming, it renders and sends the rest of the file. This lets me stream a whole UI segment without JavaScript *or* much complexity :)
 

@@ -1,15 +1,9 @@
-body, h1, p, ol, li {
-	list-style-type: none;
-	font-size: inherit;
-	padding: 0;
-	margin: 0;
-}
-
 body {
 	--terminal-padding: 24px;
-	--terminal-charwidth: 102ch;
-	padding: 40px 10px;
+	--terminal-charwidth: 100ch;
+	padding: 0 10px;
 	padding-top: 30px;
+	padding-bottom: 80px;
 	box-sizing: border-box;
 	max-width: var(--terminal-charwidth);
 	margin: 0 auto;
@@ -22,6 +16,7 @@ body {
 img {
 	display: block;
 	width: 100%;
+	height: auto;
 }
 
 .header {
@@ -50,10 +45,18 @@ img {
 	overflow-x: visible;
 }
 
+.terminal * {
+	list-style-type: none;
+	font-size: inherit;
+	font-style: inherit;
+	margin: 0;
+	padding: 0;
+}
+
 .text {
-	font-family: 'Lato', sans-serif;
-	line-height: 1.65;
-	font-size: 1.2em;
+	font-family: 'Source Serif 4', sans-serif;
+	line-height: 1.6;
+	font-size: 1.25em;
 	margin: 0 calc(var(--terminal-padding));
 	margin-top: 32px;
 }
@@ -82,7 +85,7 @@ h1 {
 }
 
 .date {
-	width: 24ch;
+	width: 19ch;
 	text-align: right;
 }
 
@@ -97,7 +100,7 @@ h1 {
 
 .host    { flex: 1; }
 .asn     { max-width: 9ch;  flex: 1; }
-.network { max-width: 25ch; flex: 1; }
+.network { max-width: 23ch; flex: 1; }
 .country { max-width: 12ch; flex: 1; }
 
 .landmark {
@@ -110,22 +113,68 @@ h1 {
 .landmark.you    { color: #ff6b6b; }
 .landmark.server { color: #4dabf7; }
 
-h2, h3 {
-	margin-top: 50px;
-	margin-bottom: -4px;
+.text h2, .text h3 {
+	font-family: 'Roboto Slab';
 	color: #ffffff;
 }
 
-h2 {
+.text h2 {
+	font-size: 1.7em;
 	margin-top: 100px;
+	margin-bottom: -4px;
+	text-align: center;
+}
+
+.text h3 {
+	margin-top: 60px;
+	margin-bottom: -4px;
+	transform: rotate(-2deg) skew(-2deg);
+	transform-origin: bottom left;
 }
 
 .text p {
 	margin: 20px 0;
 }
 
+.text li p {
+	margin: 10px 0;
+}
+
 a         { color: #4dabf7; }
 a:visited { color: #da77f2; }
+
+.orpheus-flag {
+	display: block;
+	width: 140px;
+	transform-origin: top left;
+	position: absolute;
+	top: 0;
+	left: 20px;
+	z-index: 999;
+}
+
+.orpheus-flag:hover {
+	animation: orpheus-flag-wave 0.5s linear infinite alternate;
+}
+
+.orpheus-flag img {
+	width: 100%;
+	height: auto;
+}
+
+.generated {
+	color: #dbffe0;
+}
+
+@keyframes orpheus-flag-wave {
+	0% {
+		transform: rotate(0deg);
+	}
+	
+	100% {
+		transform: rotate(-5deg);
+	}
+}
 
 @media (max-width: 1050px) {
 	.landmark {
@@ -136,6 +185,16 @@ a:visited { color: #da77f2; }
 
 	.hide-when-inline-landmark {
 		display: none;
+	}
+}
+
+@Media (max-width: 700px) {
+	.orpheus-flag {
+		width: 120px;
+	}
+
+	body {
+		padding-top: 50px;
 	}
 }
 
@@ -154,4 +213,8 @@ a:visited { color: #da77f2; }
 
 @media (max-width: 400px) {
 	.asn { display: none; }
+}
+
+::selection {
+	background: #148d36;
 }

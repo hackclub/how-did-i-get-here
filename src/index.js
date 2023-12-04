@@ -9,7 +9,7 @@ import { AsyncRouter } from 'express-async-router'
 import fs from 'node:fs'
 import { nanoid } from 'nanoid'
 import { startKtrAgent, ktrVersion } from './ktr.js'
-import { generateText } from './text-engine.js'
+import { generateText, generateEssayTracerouteInfo } from './text-engine.js'
 import { parse as renderMarkdown } from 'marked'
 
 const app = express()
@@ -20,7 +20,7 @@ const TEMPLATE_PATHS = {
 	page:         'src/templates/page.ejs',
 	updateStream: 'src/templates/update-stream.ejs',
 	traceroute:   'src/templates/traceroute.ejs',
-	staticTextMd: 'src/templates/static-text.md',
+	essayMd:      'src/templates/essay.md',
 	logoSvg:      'src/static/logo.svg'
 }
 const TEMPLATE_SPLITS = {
@@ -85,6 +85,9 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 		networkInfo: linodeInfo
 	})
 
+	const tracerouteInfo = generateEssayTracerouteInfo(update.hops)
+	pageGlobals.essayHtml = renderMarkdown(ejs.render(templates.essayMd, { pageGlobals, tracerouteInfo }))
+
 	const html = (lastStreamId ? ejs.render(templates.updateStream, { pageGlobals, streamIds: [ lastStreamId ] }) : '')
 		+ ejs.render(templates.traceroute, { hops: update.hops, pageGlobals, streamId, isTraceDone })
 	return { streamId, html, isTraceDone }
@@ -112,13 +115,12 @@ router.get('/', async (req, res) => {
 		userIp,
 		serverHost: SERVER_HOST,
 		serverIp: SERVER_IP,
-		isoDate: new Date().toISOString(),
+		isoDate: new Date().toISOString().slice(0, -5),
 		ktrVersion,
 		paragraphs: null,
 		logoSvg: templates.logoSvg,
-		staticTextHtml: '' // Filled below
+		essayHtml: '' // Rendered when traceroute is done
 	}
-	pageGlobals.staticTextHtml = renderMarkdown(ejs.render(templates.staticTextMd, { pageGlobals }))
 
 	// Start trace
 	let trace
