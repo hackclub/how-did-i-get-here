@@ -45,15 +45,19 @@
 				flex-direction: column;
 				max-width: 1200px;
 				margin: 0 auto;
+				font-family: monospace;
 			}
 		</style>
 	</head>
 	<body>
-		<h1>admin (count: <%= Object.keys(traces).length %>)</h1>
+		<h1>Admin (count: <%= Object.keys(traces).length %>)</h1>
 
 		<div class='container'>
 			<nav>
 				<ul>
+					<li data-id='all' role='button'>
+						ALL UPDATES
+					</li>
 					<% for (const trace of Object.values(traces)) { %>
 						<li data-id='<%= trace.traceId ?? trace.commandId %>' role='button'>
 							#<%= trace.traceId ?? `(${trace.commandId})` %> - <%= trace.ip %> - <%= trace.updates.length %> updates
@@ -68,6 +72,23 @@
 		<script>const traces = <%- JSON.stringify(traces) %></script>
 		<script>
 			function loadTrace(id) {
+				if (id === 'all') {
+					const allUpdates = Object.values(traces).flatMap(trace => trace.updates.map(update => ({ ...update, id: trace.traceId ?? trace.commandId })))
+					allUpdates.sort((a, b) => b.time - a.time) // Sort by timestamp
+					
+					document.getElementById('content').innerHTML = `
+						<h2>All Updates</h2>
+						<ol>
+							${allUpdates.map((update) => `
+								<li>
+									${update.kind} ${update.hopCount ?? '(no hops)'} @ ${new Date(update.time).toLocaleString()} #<span data-id='${update.id}'>${update.id}</span>
+								</li>
+							`).join('')}
+						</ol>
+					`
+					return
+				}
+
 				document.getElementById('content').innerHTML = `
 					<h2>Trace #${traces[id].traceId ?? '...'} (#${traces[id].commandId})</h2>
 					<ol>
@@ -89,6 +110,8 @@
 
 			if (sessionStorage.getItem('traceId') && traces[sessionStorage.getItem('traceId')]) {
 				loadTrace(sessionStorage.getItem('traceId'))
+			} else {
+				loadTrace('all')
 			}
 		</script>
 	</body>
