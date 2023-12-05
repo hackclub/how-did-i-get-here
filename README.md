@@ -13,7 +13,7 @@ On load, it runs a traceroute to your public IP, loading ASN and PeeringDB infor
 
 The traceroute and all lookups are powered by a custom traceroute library and agent I wrote from scratch in Rust, called [ktr](https://github.com/kognise/ktr/). It's designed to be very fault-tolerant and highly concurrent, allowing it to make sense in the context of a website like this!
 
-![](https://doggo.ninja/kv6l4b.png)
+![](https://doggo.ninja/F5uEIx.png)
 
 I tried to use Bun for this, but Node HTTP socket support wasn't comprehensive enough, so I ported it back to plain old Node with TypeScript. This always seems to happen. I am still using Bun as a package manager, though, thus the bun.lockb! I chose to do a hybrid approach (read: I developed this willy-nilly) wherein the complex, reliable code is all TypeScript, but the entrypoint is actually a JavaScript file that can do wibbly wobbly object manipulation with no trouble!
 
