@@ -91,9 +91,7 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 		} else {
 			pageGlobals.paragraphs = generateText(update)
 		}
-	} catch (error) {
-		console.error(error)
-	}
+	} catch {}
 
 	const tracerouteInfo = generateEssayTracerouteInfo(update.hops)
 	pageGlobals.essayHtml = renderMarkdown(ejs.render(templates.essayMd, { pageGlobals, tracerouteInfo }))
@@ -153,7 +151,7 @@ router.get('/', async (req, res) => {
 		let refreshInterval = null
 
 		try {
-			const { streamId, html, isTraceDone } = renderTracerouteUpdate({
+			const { streamId, html } = renderTracerouteUpdate({
 				update: {
 					kind: 'TraceUpdate',
 					id: 0,
