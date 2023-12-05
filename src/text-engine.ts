@@ -280,14 +280,6 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			didClarifyNoResponse = true
 		}
 	}
-
-	// Very first paragraph
-	pushParagraph(`
-		The above text dump is a traceroute. This particular one depicts your journey — or at least your
-		packets’ journey — traversing the networks of the Internet to reach the server hosting this website. The preceeding
-		traceroute and all future green-tinged text was generated on the fly, specially for you, during the loading of
-		this website.
-	`)
 	
 	// Beginning and first segment
 	{

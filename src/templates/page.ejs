@@ -71,17 +71,23 @@
 		
 		<section class='text'>
 			<% if (pageGlobals.paragraphs || pageGlobals.error) { %>
-				<div class='generated'>
-					<% if (pageGlobals.error) { %>
-						<p>Hey, sorry, my traceroute program was buggy or something and crashed when trying to generate this page for you. Below, you can still read an article about how this page would normally work.</p>
-						<p>Diagnostic information: <%= pageGlobals.error.message %> (<%= pageGlobals.error.kind %>)</p>
-						<p>You might be able to try again in a bit.</p>
-					<% } else { %>
+				<% if (pageGlobals.error) { %>
+					<p>Hey, sorry, my traceroute program was buggy or something and crashed when trying to generate this page for you. Below, you can still read an article about how this page would normally work.</p>
+					<p>Diagnostic information: <%= pageGlobals.error.message %> (<%= pageGlobals.error.kind %>)</p>
+					<p>You might be able to try again in a bit.</p>
+				<% } else { %>
+					<p>
+						The above text dump is a traceroute. This particular one depicts your journey — or at least your
+						packets’ journey — traversing the networks of the Internet to reach the server hosting this website. The preceeding
+						traceroute and <span class='generated'>all future green-glowing text</span> was generated on the fly, specially for you, during the loading of
+						this website.
+					</p>
+					<div class='generated'>
 						<% for (const paragraph of pageGlobals.paragraphs) { %>
 							<p><%= paragraph %></p>
 						<% } %>
-					<% } %>
-				</div>
+					</div>
+				<% } %>
 
 				<img class='divider' src='/divider.svg' role='separator' alt=''>
 				

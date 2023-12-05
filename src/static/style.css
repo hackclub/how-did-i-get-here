@@ -164,6 +164,7 @@ a:visited { color: #da77f2; }
 
 .generated {
 	color: #dbffe0;
+	text-shadow: 0 0 10px #008000;
 }
 
 @keyframes orpheus-flag-wave {
