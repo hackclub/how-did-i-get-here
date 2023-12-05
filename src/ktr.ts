@@ -21,7 +21,6 @@ export function startKtrAgent() {
 		'--completion-timeout', '12s',
 		'--destination-timeout', '30s',
 		'--wait-time-per-hop', '300ms',
-		'--max-hops', '30',
 		'--retry-frequency', '1s'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
