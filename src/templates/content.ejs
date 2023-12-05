@@ -1,0 +1,118 @@
+<div id='<%= streamId %>'>
+	<section class='terminal'>
+		<div class='terminal-inner'>
+			<h1>ktr [v<%= pageGlobals.ktrVersion %>]</h1>
+			<div class='metadata'>
+				<div class='hostinfo'>your device (<%= pageGlobals.userIp %>) -> <%= pageGlobals.serverHost %> (<%= pageGlobals.serverIp %>)</div>
+				<div class='date'><%= pageGlobals.isoDate %></div>
+			</div>
+
+			<br>
+
+			<div class='row table-header'>
+				<div class='host'>Host</div>
+				<div class='asn'>ASN</div>
+				<div class='network'>Network</div>
+				<div class='country'>Region</div>
+			</div>
+			
+			<ol class='traceroute'>
+				<% for (let i = 0; i < hops.length; i++) { %>
+					<% const hop = hops[i] %>
+					
+					<% if (hop.kind === 'Pending') { %>
+						<% if (isTraceDone && i === 0) { %>
+							<li class='no-response'>
+								<div class='landmark you'>You are here -></div>
+								<%= pageGlobals.userIp %>
+								<span class='hide-when-inline-landmark'>(no response)</span>
+							</li>
+						<% } else if (isTraceDone) { %>
+							<li class='no-response'>(no response)</li>
+						<% } else { %>
+							<% const secs = (Math.max(Date.now() - hop.since, 0) / 1000).toFixed(1) %>
+							<% if (secs >= 1) { %>
+								<li class='pending'>(waiting for reply... <%= secs %>s)</li>
+							<% } else { %>
+								<li class='pending'>(waiting for reply)</li>
+							<% } %>
+						<% } %>
+					<% } else { %>
+						<li class='row'>
+							<div class='host'>
+								<% if (i === hops.length - 1) { %>
+									<div class='landmark server'>
+										Our server
+										<span class='hide-when-inline-landmark'>-></span>
+									</div>
+								
+									<span class='hide-when-inline-landmark'>
+										<%= hop.hostname ?? hop.ip %>
+									</span>
+								<% } else if ((isTraceDone && i === 0) || hop.ip === pageGlobals.userIp) { %>
+									<div class='landmark you'>
+										You are here
+										<span class='hide-when-inline-landmark'>-></span>
+									</div>
+			
+									<span class='hide-when-inline-landmark'>
+										<%= hop.hostname ?? hop.ip %>
+									</span>
+								<% } else { %>
+									<%= hop.hostname ?? hop.ip %>
+								<% } %>
+							</div>
+			
+							<% if (hop.kind === 'Done') { %>
+								<div class='asn'>AS<%= hop.networkInfo?.asn ?? '???' %></div>
+								<div class='network'><%= hop.networkInfo?.network?.name ?? '' %></div>
+								<div class='country'>
+									<% const scope = hop.networkInfo?.network?.geographicScope %>
+									<% if (scope && scope !== 'Other' && scope !== 'Regional') { %>
+										<%= scope %>
+									<% } else if (scope === 'Regional') { %>
+										(Regional)
+									<% } %>
+								</div>
+							<% } else { %>
+								<div class='asn'>...</div>
+								<div class='network'>...</div>
+								<div class='country'>...</div>
+							<% } %>
+						</li>
+					<% } %>
+				<% } %>
+			</ol>
+		</div>
+	</section>
+
+	<section class='text'>
+		<% if (pageGlobals.paragraphs || pageGlobals.error) { %>
+			<% if (pageGlobals.error) { %>
+				<p>Hey, sorry, my traceroute program was buggy or something and crashed when trying to generate this page for you. Below, you can still read an article about how this page would normally work.</p>
+				<p>Diagnostic information: <%= pageGlobals.error.message %> (<%= pageGlobals.error.kind %>)</p>
+				<p>You might be able to try again in a bit.</p>
+			<% } else { %>
+				<p>
+					The above text dump is a traceroute. This particular one depicts your journey — or at least your
+					packets’ journey — traversing the networks of the Internet to reach the server hosting this website. The preceeding
+					traceroute and <span class='generated'>all future green-glowing text</span> was generated on the fly, specially for you, during the loading of
+					this website.
+				</p>
+				<div class='generated'>
+					<% for (const paragraph of pageGlobals.paragraphs) { %>
+						<p><%= paragraph %></p>
+					<% } %>
+				</div>
+			<% } %>
+		<% } else { %>
+			<p class='generated'>This part of the page is still loading while I wait for the above traceroute to load.</p>
+			<p style='font-style: italic'>My server is chugging hard right now with a huge influx of traffic, so I lightly rearchitected this to still show the rest of the article below.</p>
+			<p style='font-style: italic'>- Lexi, Dec 5, 10:51 AM EST</p>
+		<% } %>
+
+		<img class='divider' src='/divider.svg' role='separator' alt=''>
+		
+		<%- pageGlobals.essayHtml %>
+	</section>
+</div>

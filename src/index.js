@@ -19,12 +19,12 @@ const ktr = startKtrAgent()
 const TEMPLATE_PATHS = {
 	page:         'src/templates/page.ejs',
 	updateStream: 'src/templates/update-stream.ejs',
-	traceroute:   'src/templates/traceroute.ejs',
+	content:      'src/templates/content.ejs',
 	essayMd:      'src/templates/essay.md',
 	logoSvg:      'src/static/logo.svg'
 }
 const TEMPLATE_SPLITS = {
-	tracerouteStream: '<!-- TRACEROUTE STREAM -->'
+	contentStream: '<!-- CONTENT STREAM -->'
 }
 
 function readTemplates() {
@@ -85,11 +85,21 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 		networkInfo: linodeInfo
 	})
 
+	try {
+		if (update.kind === 'TraceDone' && update.reason.kind === 'Error') {
+			pageGlobals.error = output.reason.error
+		} else {
+			pageGlobals.paragraphs = generateText(update)
+		}
+	} catch (error) {
+		console.error(error)
+	}
+
 	const tracerouteInfo = generateEssayTracerouteInfo(update.hops)
 	pageGlobals.essayHtml = renderMarkdown(ejs.render(templates.essayMd, { pageGlobals, tracerouteInfo }))
 
 	const html = (lastStreamId ? ejs.render(templates.updateStream, { pageGlobals, streamIds: [ lastStreamId ] }) : '')
-		+ ejs.render(templates.traceroute, { hops: update.hops, pageGlobals, streamId, isTraceDone })
+		+ ejs.render(templates.content, { hops: update.hops, pageGlobals, streamId, isTraceDone })
 	return { streamId, html, isTraceDone }
 }
 
@@ -103,7 +113,7 @@ router.get('/', async (req, res) => {
 	}
 
 	const templates = readTemplates()
-	const [ beforeSplit, afterSplit ] = templates.page.split(TEMPLATE_SPLITS.tracerouteStream)
+	const [ beforeSplit, afterSplit ] = templates.page.split(TEMPLATE_SPLITS.contentStream)
 
 	// Get user IP
 	let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
@@ -145,15 +155,7 @@ router.get('/', async (req, res) => {
 					const { streamId, html, isTraceDone } = renderTracerouteUpdate({ update: cloned, pageGlobals, templates, lastStreamId, linodeInfo })
 					res.write(html)
 					lastStreamId = streamId
-					if (isTraceDone) {
-						if (update.kind === 'TraceDone' && update.reason.kind === 'Error') {
-							pageGlobals.error = output.reason.error
-						} else {
-							pageGlobals.paragraphs = generateText(cloned)
-						}
-
-						res.end(ejs.render(afterSplit, { pageGlobals }))
-					}
+					if (isTraceDone) res.end(ejs.render(afterSplit, { pageGlobals }))
 					return isTraceDone
 				} catch (error) {
 					clearInterval(refreshInterval)
@@ -163,7 +165,7 @@ router.get('/', async (req, res) => {
 			}
 			
 			const isTraceDone = render()
-			if (!isTraceDone) refreshInterval = setInterval(render, 1000)
+			if (!isTraceDone) refreshInterval = setInterval(render, 100)
 		})
 	}
 

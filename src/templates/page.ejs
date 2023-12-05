@@ -49,56 +49,6 @@
 
 		<header class='header'><%- pageGlobals.logoSvg %></header>
 
-		<section class='terminal'>
-			<div class='terminal-inner'>
-				<h1>ktr [v<%= pageGlobals.ktrVersion %>]</h1>
-				<div class='metadata'>
-					<div class='hostinfo'>your device (<%= pageGlobals.userIp %>) -> <%= pageGlobals.serverHost %> (<%= pageGlobals.serverIp %>)</div>
-					<div class='date'><%= pageGlobals.isoDate %></div>
-				</div>
-
-				<br>
-				<div>(my server is chugging a bit right now with a huge influx of traffic, i'm working on it!</div>
-				<div style='text-align: right'>- lexi, dec 5, 10:35am est)</div>
-				<br>
-
-				<div class='row table-header'>
-					<div class='host'>Host</div>
-					<div class='asn'>ASN</div>
-					<div class='network'>Network</div>
-					<div class='country'>Region</div>
-				</div>
-				<!-- TRACEROUTE STREAM -->
-			</div>
-		</section>
-		
-		<section class='text'>
-			<% if (pageGlobals.paragraphs || pageGlobals.error) { %>
-				<% if (pageGlobals.error) { %>
-					<p>Hey, sorry, my traceroute program was buggy or something and crashed when trying to generate this page for you. Below, you can still read an article about how this page would normally work.</p>
-					<p>Diagnostic information: <%= pageGlobals.error.message %> (<%= pageGlobals.error.kind %>)</p>
-					<p>You might be able to try again in a bit.</p>
-				<% } else { %>
-					<p>
-						The above text dump is a traceroute. This particular one depicts your journey — or at least your
-						packets’ journey — traversing the networks of the Internet to reach the server hosting this website. The preceeding
-						traceroute and <span class='generated'>all future green-glowing text</span> was generated on the fly, specially for you, during the loading of
-						this website.
-					</p>
-					<div class='generated'>
-						<% for (const paragraph of pageGlobals.paragraphs) { %>
-							<p><%= paragraph %></p>
-						<% } %>
-					</div>
-				<% } %>
-
-				<img class='divider' src='/divider.svg' role='separator' alt=''>
-				
-				<%- pageGlobals.essayHtml %>
-			<% } else { %>
-				<%# Should never get here, but, y'know, just in case... %>
-				<p>Running traceroute...</p>
-			<% } %>
-		</section>
+		<!-- CONTENT STREAM -->
 	</body>
 </html>
