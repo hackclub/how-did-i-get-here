@@ -34,7 +34,7 @@
 						<% } else if (isTraceDone) { %>
 							<li class='no-response'>(no response)</li>
 						<% } else { %>
-							<% const secs = (Math.max(Date.now() - hop.since, 0) / 1000).toFixed(0) %>
+							<% const secs = (Math.max(Date.now() - hop.since, 0) / 1000).toFixed(1) %>
 							<% if (secs >= 1) { %>
 								<li class='pending'>(waiting for reply... <%= secs %>s)</li>
 							<% } else { %>
@@ -91,8 +91,8 @@
 	</section>
 
 	<section class='text'>
-		<p style='font-style: italic'>My server is chugging hard right now with a huge influx of traffic, so I lightly rearchitected this to still show the rest of the article below.</p>
-		<p style='font-style: italic; margin-bottom: 32px;'>- Lexi, Dec 5, 10:51 AM EST</p>
+		<p style='font-style: italic'>My server is still chugging kinda hard right now with the huge influx of traffic from Hacker News, so you may have to be a little patient with the above traceroute.</p>
+		<p style='font-style: italic; margin-bottom: 32px;'>- Lexi, Dec 5, 5:44 PM EST</p>
 		
 		<% if (pageGlobals.paragraphs || pageGlobals.error) { %>
 			<% if (pageGlobals.error) { %>

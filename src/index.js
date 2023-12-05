@@ -183,7 +183,7 @@ router.get('/', async (req, res) => {
 			}
 			
 			const isTraceDone = render()
-			if (!isTraceDone) refreshInterval = setInterval(render, 1000)
+			if (!isTraceDone) refreshInterval = setInterval(render, 100)
 		})
 	}
 
