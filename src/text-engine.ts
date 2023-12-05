@@ -283,9 +283,10 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 	// Very first paragraph
 	pushParagraph(`
-		The above text dump is a traceroute. This particular one depicts the journey of your packets, traversing the networks
-		of the Internet to reach the server hosting this website. The preceeding traceroute and all future green-tinged text
-		was generated on the fly, specially for you, during the loading of this website.
+		The above text dump is a traceroute. This particular one depicts your journey — or at least the journey of your
+		packets — traversing the networks of the Internet to reach the server hosting this website. The preceeding
+		traceroute and all future green-tinged text was generated on the fly, specially for you, during the loading of
+		this website.
 	`)
 	
 	// Beginning and first segment
@@ -295,7 +296,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		const user = portion.hops.shift()!
 		if (user.kind === 'Pending') {
 			pushParagraph(`
-				Your journey began with your computer talking to your router. That router, your entrypoint to your ISP’s network,
+				This journey began with your computer talking to your router. That router, your entrypoint to your ISP’s network,
 				didn’t actually respond to my ping — this is pretty common for public routers or if you're behind a VPN — so we
 				just have to imagine its existence at the start of the traceroute.
 			`)
@@ -305,13 +306,13 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		} else { // Done
 			if (user.networkInfo?.network?.networkType === 'ISP') {
 				pushParagraph(`
-					Your journey began with your computer talking to your router. That router, your entrypoint to your ISP's
+				This journey began with your computer talking to your router. That router, your entrypoint to your ISP's
 					network, is the first item you’ll see in the traceroute ${user.hostname ? 'and is associated with' : 'alongside'}
 					your public IP: ${user.ip}.
 				`)
 			} else {
 				pushParagraph(`
-					Your journey began with your computer talking to your router. That router, your entrypoint to the Internet,
+					This journey began with your computer talking to your router. That router, your entrypoint to the Internet,
 					may be the first item you see in the traceroute (${user.hostname ? 'associated with' : 'alongside'} your
 					public IP, ${user.ip}). Alternately, you may be behind a VPN of some sort — in that case, the earliest point
 					we can track is the Internet-facing router that your packets are being sent through.
