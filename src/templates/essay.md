@@ -48,8 +48,6 @@ One of the reasons I wrote a cool traceroute program myself is so I could pull i
 
 I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to figure out the companies behind the ASNs; PeeringDB has information on about 1/3rd of all autonomous systems. I used all of this information, alongside a couple hundred lines of if statements, to generate the text about network traversal for you.
 
-(All <span class='generated'>light green colored text</span> was generated dynamically when you loaded this page.)
-
 WHOIS is actually an... interesting protocol to make a parser for. It turns out that the [WHOIS protocol specification](https://datatracker.ietf.org/doc/html/rfc3912/) doesn't actually specify much. It specifies that you should make a TCP connection to the WHOIS server, send whatever you want to look up, and the server will send back some info and then terminate the connection. That's all.
 
 And yet, a lot of WHOIS servers will respond with structured-seeming information:
@@ -90,7 +88,7 @@ These routes across the Internet are formed by *peering relationships* between a
 
 Example time! Router A of AS0001 is physically connected with Router B of AS0002 and they want to peer with each other. They send BGP messages to each other to establish a *BGP session*. Router A now knows that it should go through Router B for any BGP route that starts with AS0002, and vice versa.
 
-<img src='/networks-example.svg' width='380' height='308' style='max-width: 440px; margin: 40px auto;'>
+<img src='/networks-example.svg' width='380' height='308' style='max-width: 460px; margin: 40px auto;' alt='A diagram of 3 networks. AS0001 is connected to AS0002, which is in turn connected to AS1234.'>
 
 BGP peers share the routes they know about with each other in a process called *route advertisement*. In our above example, when Router A connects to Router B, it would tell Router B “hey, here are all the routes I know about, you can go through my ASN (and by extension, me) to reach all of them.” Router B adds all of those routes through Router A — so, starting with AS0001 — to its routing table. Whenever another one of Router A’s peers advertises a new route, Router A will advertise those forward to Router B.
 
@@ -116,7 +114,7 @@ Those internal hops are not very important to understanding how the Internet wor
 
 ## Recap
 
-- When you loaded this website, it used my custom traceroute program to run a traceroute to your public IP, stream that over HTTP, and then render a textual explanation of the traceroute.
+- When you loaded this website, it used my custom traceroute program to run a traceroute to your public IP (<span class='generated'><%= pageGlobals.userIp %></span>), stream that over HTTP, and then render a textual explanation of the traceroute.
 
 - A traceroute depicts the path of routers traversed between two devices on the Internet. My particular implementation works by sending ICMP packets with increasing TTL fields.
 
