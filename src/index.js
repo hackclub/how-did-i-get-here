@@ -96,13 +96,11 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 	const tracerouteInfo = generateEssayTracerouteInfo(update.hops)
 	pageGlobals.essayHtml = renderMarkdown(ejs.render(templates.essayMd, { pageGlobals, tracerouteInfo }))
 
-	const html = (lastStreamId ? ejs.render(templates.updateStream, { pageGlobals, streamIds: [ lastStreamId ] }) : '')
-		+ ejs.render(templates.content, { hops: update.hops, pageGlobals, streamId, isTraceDone })
-		+ (lastStreamId ? `
-<script>
-	window.scrollTo(window._prevScrollX, window._prevScrollY + (document.getElementById('${streamId}').offsetHeight - window._prevSectionHeight))
-</script>
-		`.trim() : '')
+	let html = ejs.render(templates.content, { hops: update.hops, pageGlobals, streamId, isTraceDone })
+	if (lastStreamId) {
+		html = ejs.render(templates.updateStream, { pageGlobals, lastStreamId, streamId, html })
+	}
+	
 	return { streamId, html, isTraceDone }
 }
 
