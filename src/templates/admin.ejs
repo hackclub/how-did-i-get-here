@@ -13,26 +13,63 @@
 			[data-id]:hover {
 				font-weight: bold;
 			}
+
+			.container {
+				display: flex;
+				gap: 40px;
+				flex: 1;
+				overflow: hidden;
+			}
+
+			html, body {
+				height: 100%;
+			}
+
+			nav {
+				width: 300px;
+				height: 100%;
+				overflow-y: auto;
+			}
+
+			nav ul {
+				list-style-type: none;
+				padding: 0;
+			}
+
+			#content {
+				flex: 1;
+			}
+
+			body {
+				display: flex;
+				flex-direction: column;
+				max-width: 1200px;
+				margin: 0 auto;
+			}
 		</style>
 	</head>
 	<body>
-		<h1>admin</h1>
-		<nav>
-			<ul>
-				<% for (const trace of Object.values(traces)) { %>
-					<li data-id='<%= trace.traceId ?? trace.commandId %>' role='button'>
-						<%= trace.traceId ?? `[${trace.commandId}]` %> - <%= trace.ip %> - <%= trace.updates.length %> updates
-					</li>
-				<% } %>
-			</ul>
-		</nav>
-		<main id='content'></main>
+		<h1>admin (count: <%= Object.keys(traces).length %>)</h1>
+
+		<div class='container'>
+			<nav>
+				<ul>
+					<% for (const trace of Object.values(traces)) { %>
+						<li data-id='<%= trace.traceId ?? trace.commandId %>' role='button'>
+							#<%= trace.traceId ?? `(${trace.commandId})` %> - <%= trace.ip %> - <%= trace.updates.length %> updates
+						</li>
+					<% } %>
+				</ul>
+			</nav>
+			
+			<main id='content'></main>
+		</div>
 
 		<script>const traces = <%- JSON.stringify(traces) %></script>
 		<script>
 			function loadTrace(id) {
 				document.getElementById('content').innerHTML = `
-					<h2>Trace ${traces[id].traceId ?? '(...)'} (${traces[id].commandId})</h2>
+					<h2>Trace #${traces[id].traceId ?? '...'} (#${traces[id].commandId})</h2>
 					<ol>
 						${traces[id].updates.map((update) => `
 							<li>
