@@ -48,7 +48,7 @@ One of the reasons I wrote a cool traceroute program myself is so I could pull i
 
 I then used this cool database called [PeeringDB](https://www.peeringdb.com/) to figure out the companies behind the ASNs; PeeringDB has information on about 1/3rd of all autonomous systems. I used all of this information, alongside a couple hundred lines of if statements, to generate the text about network traversal for you.
 
-WHOIS is actually an... interesting protocol to make a parser for. It turns out that the [WHOIS protocol specification](https://datatracker.ietf.org/doc/html/rfc3912/) doesn't actually specify much. It specifies that you should make a TCP connection to the WHOIS server, send whatever you want to look up, and the server will send back some info and then terminate the connection. That's all.
+WHOIS is actually an... interesting protocol to make a parser for. It turns out that the [WHOIS protocol specification](https://datatracker.ietf.org/doc/html/rfc3912/) doesn't actually specify much. It specifies that you should make a TCP connection to the WHOIS server, send whatever you want to look up, and the server will send back some info and then terminate the connection. That’s all.
 
 And yet, a lot of WHOIS servers will respond with structured-seeming information:
 
@@ -101,7 +101,7 @@ To route a packet to a certain IP, a border gateway first searches its routing t
 
 <div class='generated'>
 
-In the traceroute at the start, the AS path your packets ended up taking was <%= tracerouteInfo.hopAsnStrings.join(' → ') %>. That means, for example, that at some point your packet reached one of <%= tracerouteInfo.connection[0] %>'s routers that was peered with one of <%= tracerouteInfo.connection[1] %>’s routers, the router looked at its routing table and saw that the destination IP was reachable via some route starting with <%= tracerouteInfo.connection[1] %>, and sent your packet onward to that connected router.
+In the traceroute at the start, the AS path your packets ended up taking was <%= tracerouteInfo.hopAsnStrings.join(' → ') %>. That means, for example, that at some point your packet reached one of <%= tracerouteInfo.connection[0] %>’s routers that was peered with one of <%= tracerouteInfo.connection[1] %>’s routers, the router looked at its routing table and saw that the destination IP was reachable via some route starting with <%= tracerouteInfo.connection[1] %>, and sent your packet onward to that connected router.
 
 <% if (tracerouteInfo.showHighestFrequencyNetwork) { %>
 There were a couple of hops within the same ASN; look at <%= tracerouteInfo.highestFrequencyNetworkCount %> going through <%= tracerouteInfo.highestFrequencyNetworkName %>. Traceroutes do show us *every* router your packet goes between, not just the ones bordering autonomous systems. If routers know an efficient path through their internal network, they’ll often override the external BGP route with that. Those internal paths might be learned through an internal version of BGP, another internal routing protocol, or just hardcoded.

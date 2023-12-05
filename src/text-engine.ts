@@ -219,7 +219,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			text += thatRouter ? 'that router, ' : 'your router, '
 			text += 'the first portion of your trip went through '
 			text += portion.size === 1 ? 'a device ' : 'devices '
-			text += `in ${network.organization.name.trim()}'s `
+			text += `in ${network.organization.name.trim()}’s `
 			text += uniqueNetworks.size === 1 ? 'network' : 'networks'
 			if (!areNamesSimilar(network.name, network.organization.name)) text += `, ${network.name.trim()}`
 			text += '. '
@@ -283,8 +283,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 	// Very first paragraph
 	pushParagraph(`
-		The above text dump is a traceroute. This particular one depicts your journey — or at least the journey of your
-		packets — traversing the networks of the Internet to reach the server hosting this website. The preceeding
+		The above text dump is a traceroute. This particular one depicts your journey — or at least your
+		packets’ journey — traversing the networks of the Internet to reach the server hosting this website. The preceeding
 		traceroute and all future green-tinged text was generated on the fly, specially for you, during the loading of
 		this website.
 	`)
@@ -306,7 +306,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		} else { // Done
 			if (user.networkInfo?.network?.networkType === 'ISP') {
 				pushParagraph(`
-				This journey began with your computer talking to your router. That router, your entrypoint to your ISP's
+				This journey began with your computer talking to your router. That router, your entrypoint to your ISP’s
 					network, is the first item you’ll see in the traceroute ${user.hostname ? 'and is associated with' : 'alongside'}
 					your public IP: ${user.ip}.
 				`)
@@ -476,7 +476,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 			pushParagraph(`
 				${prefix}, we have ${didClarifyNoResponse ? 'another' : 'a'} probe that didn't respond.
-				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Linode's network.
+				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Linode’s network.
 				From there, you were bounced around Linode’s internal network a bit before finally reaching my server.
 			`)
 		}
