@@ -146,6 +146,22 @@ router.get('/', async (req, res) => {
 	if (!STUB_TRACEROUTE) {
 		let lastStreamId = null
 		let refreshInterval = null
+
+		try {
+			const { streamId, html, isTraceDone } = renderTracerouteUpdate({
+				update: {
+					kind: 'TraceUpdate',
+					id: 0,
+					hops: []
+				},
+				pageGlobals, templates, lastStreamId, linodeInfo
+			})
+			res.write(html)
+			lastStreamId = streamId
+		} catch (error) {
+			console.error(error)
+		}
+
 		trace.on('update', (update) => {
 			clearInterval(refreshInterval)
 

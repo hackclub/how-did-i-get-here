@@ -87,6 +87,9 @@
 	</section>
 
 	<section class='text'>
+		<p style='font-style: italic'>My server is chugging hard right now with a huge influx of traffic, so I lightly rearchitected this to still show the rest of the article below.</p>
+		<p style='font-style: italic; margin-bottom: 32px;'>- Lexi, Dec 5, 10:51 AM EST</p>
+		
 		<% if (pageGlobals.paragraphs || pageGlobals.error) { %>
 			<% if (pageGlobals.error) { %>
 				<p>Hey, sorry, my traceroute program was buggy or something and crashed when trying to generate this page for you. Below, you can still read an article about how this page would normally work.</p>
@@ -107,8 +110,6 @@
 			<% } %>
 		<% } else { %>
 			<p class='generated'>This part of the page is still loading while I wait for the above traceroute to load.</p>
-			<p style='font-style: italic'>My server is chugging hard right now with a huge influx of traffic, so I lightly rearchitected this to still show the rest of the article below.</p>
-			<p style='font-style: italic'>- Lexi, Dec 5, 10:51 AM EST</p>
 		<% } %>
 
 		<img class='divider' src='/divider.svg' role='separator' alt=''>
