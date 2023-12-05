@@ -17,6 +17,10 @@
 			</div>
 			
 			<ol class='traceroute'>
+				<% if (!isTraceDone && hops.length < 2) { %>
+					<li class='pending'>(traceroute is loading...)</li>
+				<% } %>
+
 				<% for (let i = 0; i < hops.length; i++) { %>
 					<% const hop = hops[i] %>
 					
