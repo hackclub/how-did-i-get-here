@@ -124,7 +124,7 @@ Those internal hops are not very important to understanding how the Internet wor
 
 ## Epilogue
 
-I was frustrated with the state of understanding on the structure of the Internet and seeked to write a comprehensive, interactive article covering its history and politics through the lens of protocols. However, I got caught up in a lot of complexity in life and, facing tight deadlines, didn't have the time to reach the lofty goals I had set for myself.
+I was frustrated with the state of understanding on the structure of the Internet and sought to write a comprehensive, interactive article covering its history and politics through the lens of protocols. However, I got caught up in a lot of complexity in life and, facing tight deadlines, didn't have the time to reach the lofty goals I had set for myself.
 
 Thanks to the encouragement of my friends at Hack Club, I made the best out of what I had. &ldquo;Better to ship a tiny raft than never ship that cruise yacht!&rdquo; If nothing else, I got to make use of the sick ass traceroute program that powers the shiniest part of this site :)
 
