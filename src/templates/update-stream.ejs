@@ -1,1 +1,6 @@
+<script>
+	window._prevScrollX = window.scrollX
+	window._prevScrollY = window.scrollY
+	window._prevSectionHeight = document.getElementById('<%= streamIds[0] %>').offsetHeight
+</script>
 <style><%= streamIds.map(id => '#' + id).join(',') %>{display:none}</style>
