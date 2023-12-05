@@ -34,7 +34,7 @@
 						<% } else if (isTraceDone) { %>
 							<li class='no-response'>(no response)</li>
 						<% } else { %>
-							<% const secs = (Math.max(Date.now() - hop.since, 0) / 1000).toFixed(1) %>
+							<% const secs = (Math.max(Date.now() - hop.since, 0) / 1000).toFixed(0) %>
 							<% if (secs >= 1) { %>
 								<li class='pending'>(waiting for reply... <%= secs %>s)</li>
 							<% } else { %>
