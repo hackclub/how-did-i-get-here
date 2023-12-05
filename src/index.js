@@ -2,7 +2,7 @@
 // wishy washy object manipulation and network stuff happening here. All other files containing
 // important business logic (for example, the text engine) are typed.
 
-import { LINODE_ASN, SERVER_HOST, SERVER_IP, PORT, STUB_TRACEROUTE } from './env.js'
+import { LINODE_ASN, SERVER_HOST, SERVER_IP, PORT, STUB_TRACEROUTE, ADMIN_PASSWORD } from './env.js'
 import express from 'express'
 import ejs from 'ejs'
 import { AsyncRouter } from 'express-async-router'
@@ -21,6 +21,7 @@ const TEMPLATE_PATHS = {
 	updateStream: 'src/templates/update-stream.ejs',
 	content:      'src/templates/content.ejs',
 	essayMd:      'src/templates/essay.md',
+	admin:		  'src/templates/admin.ejs',
 	logoSvg:      'src/static/logo.svg'
 }
 const TEMPLATE_SPLITS = {
@@ -193,6 +194,12 @@ router.get('/', async (req, res) => {
 		res.write(html)
 		res.end(ejs.render(afterSplit, { pageGlobals }))
 	}
+})
+
+router.get('/admin', async (req, res) => {
+	if (req.query.password !== ADMIN_PASSWORD) return res.sendStatus(401)
+	const html = ejs.render(readTemplates().admin, { traces: ktr.traces })
+	res.status(200).end(html)
 })
 
 console.log('starting up...')

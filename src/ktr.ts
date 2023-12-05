@@ -13,6 +13,17 @@ export interface TraceEmitter extends EventEmitter {
 	emit(event: 'update', update: ControllerResult): boolean
 }
 
+interface Trace {
+	commandId: number
+	traceId: number | null
+	ip: string
+	updates: {
+		kind: string
+		hopCount: number | null
+		time: number
+	}[]
+}
+
 export function startKtrAgent() {
 	const agent = childProcess.spawn(KTR_AGENT_PATH, [
 		'--interface-name', TRACEROUTE_INTERFACE_NAME,
@@ -41,6 +52,9 @@ export function startKtrAgent() {
 	const traceHandlers: ((result: ControllerResult) => void)[] = [] // traceId -> update handler
 	const asnHandlers: Record<number, (network: Network | null) => void> = {} // asn -> asn handler
 
+	// For introspection
+	const traces: Record<number, Trace> = {}
+
 	const splitter = split(JSON.parse, undefined, { trailing: false /* don't crash on EOF, we handle it in "exit" event */ })
 	agent.stdout.pipe(splitter).on('data', (output: Output) => {
 		if (output.kind === 'StartedTrace') {
@@ -58,9 +72,31 @@ export function startKtrAgent() {
 	function trace(ip: string): TraceEmitter {
 		const emitter: TraceEmitter = new EventEmitter()
 		const commandId = genCommandId()
+
+		traces[commandId] = {
+			commandId,
+			traceId: null,
+			ip,
+			updates: [
+				{ kind: 'Created', hopCount: null, time: Date.now() }
+			]
+		}
+
 		startedTraces[commandId] = (traceId: number) => {
 			delete startedTraces[commandId]
-			traceHandlers[traceId] = (update) => emitter.emit('update', update)
+			traceHandlers[traceId] = (update) => {
+				emitter.emit('update', update)
+
+				if (update.kind === 'TraceDone') {
+					delete traces[traceId]
+				} else {
+					traces[traceId].updates.push({ kind: update.kind, hopCount: update.hops.length, time: Date.now() })
+				}
+			}
+			traces[traceId] = traces[commandId]
+			delete traces[commandId]
+			traces[traceId].traceId = traceId
+			traces[traceId].updates.push({ kind: 'Started', hopCount: null, time: Date.now() })
 		}
 		exec({ kind: 'StartTrace', commandId, ip })
 		return emitter
@@ -74,7 +110,7 @@ export function startKtrAgent() {
 		})
 	}
 
-	return { trace, lookupAsn }
+	return { trace, lookupAsn, traces }
 }
 
 function getKtrVersion() {

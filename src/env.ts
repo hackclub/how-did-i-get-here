@@ -12,6 +12,7 @@ const requireEnv = (name: string): string => {
 export const KTR_AGENT_PATH = requireEnv('KTR_AGENT_PATH')
 export const TRACEROUTE_INTERFACE_NAME = requireEnv('TRACEROUTE_INTERFACE_NAME')
 export const PEERINGDB_PATH = requireEnv('PEERINGDB_PATH')
+export const ADMIN_PASSWORD = requireEnv('ADMIN_PASSWORD')
 export const PORT = parseInt(process.env.PORT ?? '3000')
 export const SERVER_HOST = process.env.SERVER_HOST ?? 'localhost'
 export const SERVER_IP = process.env.SERVER_IP ?? '127.0.0.1'

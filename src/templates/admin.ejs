@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset='UTF-8'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css'>
+		<title>Admin</title>
+		<style>
+			[data-id] {
+				cursor: pointer;
+			}
+
+			[data-id]:hover {
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>admin</h1>
+		<nav>
+			<ul>
+				<% for (const trace of Object.values(traces)) { %>
+					<li data-id='<%= trace.traceId ?? trace.commandId %>' role='button'>
+						<%= trace.traceId ?? `[${trace.commandId}]` %> - <%= trace.ip %> - <%= trace.updates.length %> updates
+					</li>
+				<% } %>
+			</ul>
+		</nav>
+		<main id='content'></main>
+
+		<script>const traces = <%- JSON.stringify(traces) %></script>
+		<script>
+			function loadTrace(id) {
+				document.getElementById('content').innerHTML = `
+					<h2>Trace ${traces[id].traceId ?? '(...)'} (${traces[id].commandId})</h2>
+					<ol>
+						${traces[id].updates.map((update) => `
+							<li>
+								${update.kind} ${update.hopCount ?? '(no hops)'} @ ${new Date(update.time).toLocaleString()}
+							</li>
+						`).join('')}
+					</ol>
+				`
+			}
+
+			document.addEventListener('click', (event) => {
+				if (event.target.dataset.id) {
+					loadTrace(event.target.dataset.id)
+					sessionStorage.setItem('traceId', event.target.dataset.id)
+				}
+			}, { capture: true, passive: true  })
+
+			if (sessionStorage.getItem('traceId') && traces[sessionStorage.getItem('traceId')]) {
+				loadTrace(sessionStorage.getItem('traceId'))
+			}
+		</script>
+	</body>
+</html>
