@@ -50,7 +50,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
-	// console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
+	console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
 
 	// Yeet the last portion into its own variable
 	const lastHops = portions.pop()!.hops
