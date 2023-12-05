@@ -20,7 +20,9 @@ export function startKtrAgent() {
 		'--disable-ipv6',
 		'--completion-timeout', '10s',
 		'--destination-timeout', '15s',
-		'--wait-time-per-hop', '500ms'
+		'--wait-time-per-hop', '500ms',
+		'--max-hops', '32',
+		'--retry-frequency', '3s'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
 	agent.on('error', (err) => {
