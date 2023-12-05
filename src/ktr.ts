@@ -18,10 +18,10 @@ export function startKtrAgent() {
 		'--interface-name', TRACEROUTE_INTERFACE_NAME,
 		'--peeringdb-path', PEERINGDB_PATH,
 		'--disable-ipv6',
-		'--completion-timeout', '6s',
+		'--completion-timeout', '10s',
 		'--destination-timeout', '15s',
-		'--wait-time-per-hop', '500ms',
-		'--max-hops', '24',
+		'--wait-time-per-hop', '600ms',
+		'--max-hops', '32',
 		'--retry-frequency', '5s'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
