@@ -90,13 +90,13 @@ export function startKtrAgent() {
 				if (update.kind === 'TraceDone') {
 					delete traces[traceId]
 				} else {
-					traces[traceId].updates.push({ kind: update.kind, hopCount: update.hops.length, time: Date.now() })
+					if (traces[traceId]) traces[traceId].updates.push({ kind: update.kind, hopCount: update.hops.length, time: Date.now() })
 				}
 			}
 			traces[traceId] = traces[commandId]
 			delete traces[commandId]
 			traces[traceId].traceId = traceId
-			traces[traceId].updates.push({ kind: 'Started', hopCount: null, time: Date.now() })
+			if (traces[traceId]) traces[traceId].updates.push({ kind: 'Started', hopCount: null, time: Date.now() })
 		}
 		exec({ kind: 'StartTrace', commandId, ip })
 		return emitter
