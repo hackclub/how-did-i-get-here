@@ -36,16 +36,24 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
-	// Merge portion gaps (ex: <[Comcast]> <[Pending]> <[Comcast]> -> <[Comcast, Pending, Comcast]>)
+	// Merge pending portions by sandwiching or favoring the first portion:
+	// - <[Comcast]> <[Pending]> <[Comcast]> -> <[Comcast, Pending, Comcast]>)
+	// - <[Comcast]> <[Pending]> <[Akamai]> -> <[Comcast, Pending]> <[Akamai]>
 	for (let i = 0; i < portions.length - 2; i++) {
 		const [ first, middle, last ] = portions.slice(i, i + 3)
-		const canSandwich = first.key.kind === 'Done' && middle.key.kind === 'Pending' && last.key.kind === 'Done'
-			&& (first.key.networkInfo?.asn === last.key.networkInfo?.asn
-				|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id))
-		if (canSandwich) {
+
+		const canMerge = first.key.kind === 'Done' && middle.key.kind === 'Pending'
+		const canSandwichMerge = first.key.networkInfo?.asn === last.key.networkInfo?.asn
+			|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id)
+
+		if (canMerge) {
 			first.hops.push(...middle.hops)
-			first.hops.push(...last.hops)
-			portions.splice(i + 1, 2)
+			if (canSandwichMerge) {
+				first.hops.push(...last.hops)
+				portions.splice(i + 1, 2)
+			} else {
+				portions.splice(i + 1, 1)
+			}
 			i--
 		}
 	}
@@ -258,8 +266,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		if (didClarifyHostname) return
 		pushParagraph(`
 			(By the way, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking my DNS server
-			if there’s any name associated with the IP, ${hop.ip}. Since there was, I used the “pretty” human-readable
-			name instead of the numbers. Reverse DNS names are usually just designed to make debugging easier, and often
+			if there’s any name associated with the IP actually returned in the traceroute, ${hop.ip}. Since there was, I used the “pretty” human-readable
+			name instead of the numbers. Reverse DNS names are usually only designed to make debugging easier, and often
 			don’t even map back to the original IP.)
 		`)
 		lastWasSideNote = true
@@ -452,10 +460,19 @@ export function generateEssayTracerouteInfo(hops: Hop[]) {
 	let highestFrequency = 0
 	let highestFrequencyAsn: number | null = null
 	for (const [ asn, freq ] of Object.entries(frequency)) {
-		// if (Number(asn) === HETZNER_ASN) continue
+		if (Number(asn) === HETZNER_ASN) continue
 		if (freq > highestFrequency) {
 			highestFrequency = freq
 			highestFrequencyAsn = Number(asn)
+		}
+	}
+	if (highestFrequency <= 2) {
+		// Try again but allow Hetzner (yeah I know this is probably bad code)
+		for (const [ asn, freq ] of Object.entries(frequency)) {
+			if (freq > highestFrequency) {
+				highestFrequency = freq
+				highestFrequencyAsn = Number(asn)
+			}
 		}
 	}
 
