@@ -39,24 +39,24 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	// Merge pending portions by sandwiching or favoring the first portion:
 	// - <[Comcast]> <[Pending]> <[Comcast]> -> <[Comcast, Pending, Comcast]>)
 	// - <[Comcast]> <[Pending]> <[Akamai]> -> <[Comcast, Pending]> <[Akamai]>
-	for (let i = 0; i < portions.length - 2; i++) {
-		const [ first, middle, last ] = portions.slice(i, i + 3)
+	// for (let i = 0; i < portions.length - 2; i++) {
+	// 	const [ first, middle, last ] = portions.slice(i, i + 3)
 
-		const canMerge = first.key.kind === 'Done' && middle.key.kind === 'Pending'
-		const canSandwichMerge = first.key.networkInfo?.asn === last.key.networkInfo?.asn
-			|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id)
+	// 	const canMerge = first.key.kind === 'Done' && middle.key.kind === 'Pending'
+	// 	const canSandwichMerge = first.key.networkInfo?.asn === last.key.networkInfo?.asn
+	// 		|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id)
 
-		if (canMerge) {
-			if (canSandwichMerge) {
-				first.hops.push(...middle.hops)
-				first.hops.push(...last.hops)
-				portions.splice(i + 1, 2)
-				i--
-			} else {
-				// portions.splice(i + 1, 1)
-			}
-		}
-	}
+	// 	if (canMerge) {
+	// 		if (canSandwichMerge) {
+	// 			first.hops.push(...middle.hops)
+	// 			first.hops.push(...last.hops)
+	// 			portions.splice(i + 1, 2)
+	// 			i--
+	// 		} else {
+	// 			// portions.splice(i + 1, 1)
+	// 		}
+	// 	}
+	// }
 
 	// console.log(portions.map(p => p.hops.map(h => h.kind === 'Done' ? h.hostname ?? h.ip : '(pending)')))
 
