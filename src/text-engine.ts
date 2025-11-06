@@ -393,70 +393,32 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 
 	// Ending
 	{
-		// function isAkamai(hop: Hop): hop is Hop_Done {
-		// 	return hop.kind === 'Done' && hop.networkInfo?.asn === AKAMAI_ASN
-		// }
-		function isHetznerInternal(hop: Hop): hop is Hop_Done {
-			return hop.kind === 'Done' && hop.ip.startsWith('172.') && hop.networkInfo?.asn === HETZNER_ASN
-		}
 		function isServer(hop: Hop): hop is Hop_Done {
 			return hop.kind === 'Done' && hop.ip === SERVER_IP && hop.hostname === SERVER_HOST
 		}
 		function isHetznerEntrypoint(hop: Hop): hop is Hop_Done {
-			return hop.kind === 'Done' && hop.networkInfo?.asn === HETZNER_ASN && !isHetznerInternal(hop) && !isServer(hop)
+			return hop.kind === 'Done' && hop.networkInfo?.asn === HETZNER_ASN && !isServer(hop)
 		}
 
-		let reachedAkamai = false
-
-		let hopsBeforeHetzner: Hop[]
-		// if (isAkamai(lastHops[0])) {
-		// 	// Somewhat easy, we at least have Akamai
-			
-		// 	reachedAkamai = true
-		// 	if (portions.at(-1)) {
-		// 		const transitionIsPending = portions.at(-1)!.hops.at(-1)?.kind === 'Pending'
-		// 		clarifyNoResponseIfNeeded(portions.at(-1)!.hops, transitionIsPending)
-		// 	}
-
-		// 	const prevNetworkName = (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.name.trim?.())
-		// 		?? (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.asn && 'AS' + prevHop.networkInfo.network.asn)
-		// 		?? 'that network'
-
-		// 	networkTypeCounts['Content']++
-		// 	const prefix = {
-		// 		'0':   `After a couple of hops${lastWasSideNote ? '' : ', however'}`,
-		// 		'1-3': 'Eventually',
-		// 		'4+':  'After all that'
-		// 	}[intermediates]
-		// 	pushParagraph(`
-		// 		${prefix}, you needed to leave the realm of ${prevNetworkName}
-		// 		to reach my server. You went through Akamai’s network (AS${AKAMAI_ASN}) — they’re a large CDN with
-		// 		many points of presence on the Internet, so it makes sense that you might get routed through them.
-		// 		That said, Akamai also bought Linode (my server provider) a couple of years back, so it makes sense
-		// 		that they would set themselves up as a good path to Linode’s network.
-		// 	`)
-
-		// 	hopsBeforeLinode = []
-		// 	while (!(isLinodeEntrypoint(lastHops[0]) || isLinodeInternal(lastHops[0]) || isServer(lastHops[0]))) {
-		// 		hopsBeforeLinode.push(lastHops.shift()!)
-		// 	}
-		// } else {
-			hopsBeforeHetzner = portions.at(-1)?.hops ?? []
-		// }
-
-		const prefix = {
-			'0':   reachedAkamai ? 'After Akamai' : 'Eventually',
-			'1-3': reachedAkamai ? 'After Akamai' : 'Finally',
-			'4+':  reachedAkamai ? 'Finally'      : 'After all that'
-		}[intermediates]
+		const getPrefix = () => ({
+			'0':   `${lastWasSideNote ? 'Anyways, a' : 'A'}fter a couple of hops`,
+			'1-3': 'Eventually',
+			'4+':  'After all that',
+		}[intermediates])
 		if (isHetznerEntrypoint(lastHops[0])) {
 			// Easy, we have the Hetzner entrypoint
 			
-			clarifyNoResponseIfNeeded(hopsBeforeHetzner.slice(-1), true)
+			clarifyNoResponseIfNeeded((portions.at(-1)?.hops ?? []).slice(-1), true)
 			clarifyNoResponseIfNeeded(lastHops, false)
 
+			const prevNetworkName = (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.name.trim?.())
+				?? (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.asn && 'AS' + prevHop.networkInfo.network.asn)
+				?? 'that network'
+
 			pushParagraph(`
-				${prefix}, you ended up at ${lastHops[0].hostname ?? lastHops[0].ip}, your entrypoint to Hetzner’s network.
+				${getPrefix()}, you needed to leave the realm of ${prevNetworkName}
+				to reach my server.
+				I use Hetzner as a hosting provider, and your entrypoint to their realm was ${lastHops[0].hostname ?? lastHops[0].ip}.
 				From there, you were bounced around Hetzner’s internal network a bit before finally reaching my server.
 			`)
 			if (lastHops[0].hostname) clarifyHostname(lastHops[0])
@@ -467,8 +429,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			while (lastHops.at(-1 - unknownHopCount)?.kind === 'Pending') unknownHopCount++
 
 			pushParagraph(`
-				${prefix}, we have ${didClarifyNoResponse ? 'another' : 'a'} probe that didn't respond.
-				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Hetzner’s network.
+				${getPrefix()}, we have ${didClarifyNoResponse ? 'another' : 'a'} probe that didn't respond.
+				${unknownHopCount >= 2 ? 'One of these' : 'This'} is most likely your entrypoint to Hetzner’s network (they're my hosting provider).
 				From there, you were bounced around Hetzner’s internal network a bit before finally reaching my server.
 			`)
 		}

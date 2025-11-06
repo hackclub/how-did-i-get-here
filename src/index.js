@@ -54,9 +54,15 @@ function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, 
 		}
 	}
 
+	// Remove the first hop if it's the Hetzner gateway, which doesn't show up
+	// in a normal traceroute
+	if (update.hops[0]?.ip?.startsWith?.('172.')) {
+		update.hops.shift()
+	}
+
 	// Mark the first couple of internal hops as Hetzner's ASN
 	for (const hop of update.hops) {
-		if (!hop.networkInfo && hop.ip?.startsWith?.('172.')) {
+		if (!hop.networkInfo) {
 			hop.networkInfo = hetznerInfo
 		} else if (hop.networkInfo) {
 			break
