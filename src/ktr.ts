@@ -29,7 +29,7 @@ export function startKtrAgent() {
 		'--interface-name', TRACEROUTE_INTERFACE_NAME,
 		'--peeringdb-path', PEERINGDB_PATH,
 		'--disable-ipv6',
-		'--completion-timeout', '6s',
+		'--completion-timeout', '10s',
 		'--destination-timeout', '3s',
 		'--wait-time-per-hop', '300ms',
 		'--retry-frequency', '1s'
