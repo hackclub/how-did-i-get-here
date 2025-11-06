@@ -30,8 +30,8 @@ export function startKtrAgent() {
 		'--peeringdb-path', PEERINGDB_PATH,
 		'--disable-ipv6',
 		'--completion-timeout', '10s',
-		'--destination-timeout', '3s',
-		'--wait-time-per-hop', '300ms',
+		'--destination-timeout', '5s',
+		'--wait-time-per-hop', '500ms',
 		'--retry-frequency', '1s'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
