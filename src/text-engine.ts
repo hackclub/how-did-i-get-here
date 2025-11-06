@@ -54,6 +54,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				i--
 			} else {
 				portions.splice(i + 1, 1)
+				i--
+				i--
 			}
 		}
 	}
