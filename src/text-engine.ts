@@ -357,7 +357,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	// Intermediate segments
 	let intermediates: '0' | '1-3' | '4+' = '0'
 	{
-		if (portions[0]?.key?.kind === 'Pending') {
+		if (!isStraightEntryFromIsp && portions[0]?.key?.kind === 'Pending') {
 			clarifyNoResponseIfNeeded(portions.shift()!.hops, true)
 		}
 
@@ -402,7 +402,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 
 		for (const portion of portions) {
-			if (portion === portions.at(-1)) { // Not the last one yet, because this might be a transition to the end
+			if (!isStraightEntryFromIsp && portion === portions.at(-1)) { // Not the last one yet, because this might be a transition to the end
 				clarifyNoResponseIfNeeded(portion.hops, false)
 			}
 			isStraightEntryFromIsp = false
