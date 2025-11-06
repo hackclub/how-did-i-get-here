@@ -351,15 +351,13 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			}
 		}
 	}
-
-	console.warn(portions)
 	
 	// Intermediate segments
 	let intermediates: '0' | '1-3' | '4+' = '0'
 	{
-		if (portions[0]?.key?.kind === 'Pending') {
-			clarifyNoResponseIfNeeded(portions.shift()!.hops, true)
-		}
+		// if (portions[0]?.key?.kind === 'Pending') {
+		// 	clarifyNoResponseIfNeeded(portions.shift()!.hops, true)
+		// }
 
 		const doneRemaining = portions.filter(portion => portion.key.kind === 'Done')
 		if (doneRemaining.length === 1) {
