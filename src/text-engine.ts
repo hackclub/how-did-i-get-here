@@ -441,7 +441,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			pushParagraph(`
 				${getPrefix()}, you needed to leave the realm of ${prevNetworkName}
 				to reach my server.
-				I use Hetzner as a hosting provider, and your entrypoint to their realm was ${lastHops[0].hostname ?? lastHops[0].ip}.
+				I use Hetzner as a hosting provider, and your entrypoint into their network was ${lastHops[0].hostname ?? lastHops[0].ip}.
 				From there, you were bounced around Hetzner’s internal network a bit before finally reaching my server.
 			`)
 			if (lastHops[0].hostname) clarifyHostname(lastHops[0])
