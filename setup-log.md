@@ -29,7 +29,10 @@ service caddy start
 
 the actual server runs inside bun, which is a javascript runtime.
 
-{tbd how it's running and how to restart it}
+right now it's just running in a tmux session, wrapped in a really stupid program i wrote when i was 12 called cach. it should really be in a systemd service.
+
+- to restart it, you can `tmux attach`, Ctrl-C to kill it, and then rerun the command.
+- if the server got restarted, run `tmux` to make a new session, then `cd /root/how-did-i-get-here` and run `cach bun start`.
 
 ### admin page
 
