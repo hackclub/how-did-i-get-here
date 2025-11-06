@@ -47,14 +47,14 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id)
 
 		if (canMerge) {
-			first.hops.push(...middle.hops)
 			if (canSandwichMerge) {
+				first.hops.push(...middle.hops)
 				first.hops.push(...last.hops)
 				portions.splice(i + 1, 2)
+				i--
 			} else {
-				portions.splice(i + 1, 1)
+				// portions.splice(i + 1, 1)
 			}
-			i--
 		}
 	}
 
@@ -419,11 +419,13 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			return hop.kind === 'Done' && hop.networkInfo?.asn === HETZNER_ASN && !isServer(hop)
 		}
 
-		const getPrefix = () => ({
-			'0':   `${lastWasSideNote ? 'Anyways, a' : 'A'}fter a couple of hops`,
-			'1-3': 'Eventually',
-			'4+':  'After all that',
-		}[intermediates])
+		const getPrefix = () => isStraightEntryFromIsp
+			? 'Anyways, '
+			: {
+				'0':   `${lastWasSideNote ? 'Anyways, a' : 'A'}fter a couple of hops`,
+				'1-3': 'Eventually',
+				'4+':  'After all that',
+			}[intermediates]
 		if (isHetznerEntrypoint(lastHops[0])) {
 			// Easy, we have the Hetzner entrypoint
 			
@@ -433,8 +435,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			clarifyNoResponseIfNeeded(lastHops, false)
 
 			const prevNetworkName = (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.name.trim?.())
-				?? (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.asn && 'AS' + prevHop.networkInfo.network.asn)
-				?? 'that network'
+				|| (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.asn && 'AS' + prevHop.networkInfo.network.asn)
+				|| 'that network'
 
 			pushParagraph(`
 				${getPrefix()}, you needed to leave the realm of ${prevNetworkName}
