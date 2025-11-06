@@ -352,7 +352,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 	}
 
-	console.log(portions)
+	console.warn(portions)
 	
 	// Intermediate segments
 	let intermediates: '0' | '1-3' | '4+' = '0'
