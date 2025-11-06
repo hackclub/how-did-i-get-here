@@ -47,14 +47,14 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			|| (first.key.networkInfo?.network && first.key.networkInfo?.network?.organization.id === last.key.networkInfo?.network?.organization.id)
 
 		if (canMerge) {
-			first.hops.push(...middle.hops)
 			if (canSandwichMerge) {
+				first.hops.push(...middle.hops)
 				first.hops.push(...last.hops)
 				portions.splice(i + 1, 2)
+				i--
 			} else {
-				portions.splice(i + 1, 1)
+				// portions.splice(i + 1, 1)
 			}
-			i--
 		}
 	}
 
