@@ -237,7 +237,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			text += 'the first portion of your trip went through '
 			text += portion.size === 1 ? 'a device ' : 'devices '
 			text += `in ${network.organization.name.trim()}’s `
-			text += uniqueNetworks.size === 1 ? 'network' : 'networks'
+			text += uniqueNetworks.size <= 1 ? 'network' : 'networks'
 			if (!areNamesSimilar(network.name, network.organization.name)) text += `, ${network.name.trim()}`
 			text += '. '
 
