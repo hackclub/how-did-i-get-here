@@ -273,7 +273,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	function clarifyHostname(hop: Hop_Done) {
 		if (didClarifyHostname) return
 		pushParagraph(`
-			(By the way, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking my DNS server
+			(Side note, that ${hop.hostname} thing is the result of a reverse DNS lookup I did by asking my DNS server
 			if there’s any name associated with the IP actually returned in the traceroute, ${hop.ip}. Since there was, I used the “pretty” human-readable
 			name instead of the numbers. Reverse DNS names are usually only designed to make debugging easier, and often
 			don’t even map back to the original IP.)
@@ -351,6 +351,8 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			}
 		}
 	}
+
+	console.log(portions)
 	
 	// Intermediate segments
 	let intermediates: '0' | '1-3' | '4+' = '0'

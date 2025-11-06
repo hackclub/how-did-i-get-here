@@ -39,14 +39,14 @@ function genStreamId() {
 	return 'str' + nanoid(4)
 }
 
-function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, hetznerInfo }) {
+function renderTracerouteUpdate({ update, pageGlobals, templates, lastStreamId, hetznerInfo, userInfo }) {
 	const streamId = genStreamId()
 	const isTraceDone = update.kind === 'TraceDone'
 
 	// Improve hop info and prune multiple loading hops
 	for (let i = 0; i < update.hops.length; i++) {
 		const hop = update.hops[i]
-		// if (!hop.hostname && hop.ip === pageGlobals.userIp) hop.hostname = 'your device'
+		if (!hop.networkInfo && hop.ip === pageGlobals.userIp) hop.networkInfo = userInfo
 
 		if (hop.kind === 'Pending' && update.hops[i + 1]?.kind === 'Pending') {
 			update.hops.splice(i, 1)
@@ -127,6 +127,12 @@ router.get('/', async (req, res) => {
 	let userIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()
 	if (userIp === 'localhost' || userIp === '::1' || userIp === '127.0.0.1') userIp = '76.76.21.21' // kognise.dev
 	userIp = userIp.replace(/^::ffff:/, '')
+
+	const userInfo = null // TODO:
+	// const userInfo = {
+	// 	asn: HETZNER_ASN,
+	// 	network: await ktr.lookupAsn(HETZNER_ASN)
+	// }
 
 	// Globals for EJS renders
 	const pageGlobals = {
