@@ -6,7 +6,7 @@ export interface Organization {
 
 export type GeographicScope = 'Regional' | 'NorthAmerica' | 'AsiaPacific' | 'Europe' | 'SouthAmerica' | 'Africa' | 'Australia' | 'MiddleEast' | 'Global' | 'Other'
 
-export type NetworkType = 'NSP' | 'Content' | 'ISP' | 'Enterprise' | 'Educational' | 'NonProfit' | 'RouteServer' | 'NetworkServices' | 'RouteCollector' | 'Government' | 'Other'
+export type NetworkType = 'Nsp' | 'Content' | 'Isp' | 'NspOrIsp' | 'Enterprise' | 'Educational' | 'NonProfit' | 'RouteServer' | 'NetworkServices' | 'RouteCollector' | 'Government' | 'Other'
 
 export interface NetworkProtocols {
 	unicastIpv4: boolean
@@ -23,7 +23,7 @@ export interface Network {
 	geographicScope: GeographicScope
 	asn: number
 	networkType: NetworkType
-	protocols: NetworkProtocols
+	protocols: NetworkProtocols | null
 }
 
 export interface NetworkInfo {

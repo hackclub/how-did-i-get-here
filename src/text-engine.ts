@@ -73,9 +73,10 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	}
 
 	const networkTypeCounts: Record<NetworkType, number> = {
-		NSP: 0,
+		Nsp: 0,
 		Content: 0,
-		ISP: 0,
+		Isp: 0,
+		NspOrIsp: 0,
 		Enterprise: 0,
 		Educational: 0,
 		NonProfit: 0,
@@ -95,7 +96,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		let shortSupportsAnother: boolean // Whether short works with "another" as a prefix
 
 		switch (networkType) {
-			case 'NSP': {
+			case 'Nsp': {
 				long = 'a network service provider, a company that sells Internet access to other companies'
 				short = 'NSP'
 				shortArticle = 'a'
@@ -109,9 +110,16 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 				shortSupportsAnother = true
 				break
 			}
-			case 'ISP': {
+			case 'Isp': {
 				long = 'an Internet service provider'
 				short = 'ISP'
+				shortArticle = 'an'
+				shortSupportsAnother = true
+				break
+			}
+			case 'NspOrIsp': {
+				long = 'either an ISP or a provider that sells Internet access to other companies'
+				short = 'NSP/ISP'
 				shortArticle = 'an'
 				shortSupportsAnother = true
 				break
@@ -232,11 +240,11 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			if (!areNamesSimilar(network.name, network.organization.name)) text += `, ${network.name.trim()}`
 			text += '. '
 
-			if (network.networkType === 'ISP') {
-				networkTypeCounts['ISP']++
+			if (network.networkType === 'Isp') {
+				networkTypeCounts['Isp']++
 				text += `That’s probably your ISP, responsible for connecting you to the Internet in exchange for money.`
-			} else if (network.networkType === 'NSP') {
-				networkTypeCounts['ISP']++ // Not a typo
+			} else if (network.networkType === 'Nsp' || network.networkType === 'NspOrIsp') {
+				networkTypeCounts['Isp']++ // Not a typo
 				text += `That’s either your ISP, responsible for connecting you to the Internet in exchange for money, or a company your Internet provider contracts.`
 			} else {
 				text += `
@@ -304,9 +312,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			const nextPortion = portions.shift()
 			if (nextPortion) firstSegment(nextPortion, false, false)
 		} else { // Done
-			if (user.networkInfo?.network?.networkType === 'ISP') {
+			if (user.networkInfo?.network?.networkType === 'Isp') {
 				pushParagraph(`
-				This journey began with your computer talking to your router. That router, your entrypoint to your ISP’s
+					This journey began with your computer talking to your router. That router, your entrypoint to your ISP’s
 					network, is the first item you’ll see in the traceroute ${user.hostname ? 'and is associated with' : 'alongside'}
 					your public IP: ${user.ip}.
 				`)
