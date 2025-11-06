@@ -223,6 +223,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	}
 
 	function firstSegment(portion: Portion, includesFirst: boolean, thatRouter: boolean) {
+		isStraightEntryFromIsp = false
 		prevHop = portion.hops.at(-1)!
 		if (portion.key.networkInfo && portion.key.networkInfo.network) {
 			const network = portion.key.networkInfo.network
@@ -298,6 +299,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	}
 	
 	// Beginning and first segment
+	let isStraightEntryFromIsp = true
 	{
 		const portion = portions.shift()!
 		
@@ -355,9 +357,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 	// Intermediate segments
 	let intermediates: '0' | '1-3' | '4+' = '0'
 	{
-		// if (portions[0]?.key?.kind === 'Pending') {
-		// 	clarifyNoResponseIfNeeded(portions.shift()!.hops, true)
-		// }
+		if (portions[0]?.key?.kind === 'Pending') {
+			clarifyNoResponseIfNeeded(portions.shift()!.hops, true)
+		}
 
 		const doneRemaining = portions.filter(portion => portion.key.kind === 'Done')
 		if (doneRemaining.length === 1) {
@@ -403,6 +405,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 			if (portion === portions.at(-1)) { // Not the last one yet, because this might be a transition to the end
 				clarifyNoResponseIfNeeded(portion.hops, false)
 			}
+			isStraightEntryFromIsp = false
 			if (portion.key.kind === 'Done') prevHop = portion.hops.at(-1)!
 		}
 	}
@@ -424,7 +427,9 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		if (isHetznerEntrypoint(lastHops[0])) {
 			// Easy, we have the Hetzner entrypoint
 			
-			clarifyNoResponseIfNeeded((portions.at(-1)?.hops ?? []).slice(-1), true)
+			if (!isStraightEntryFromIsp) {
+				clarifyNoResponseIfNeeded((portions.at(-1)?.hops ?? []).slice(-1), true)
+			}
 			clarifyNoResponseIfNeeded(lastHops, false)
 
 			const prevNetworkName = (prevHop.kind === 'Done' && prevHop.networkInfo?.network?.name.trim?.())
