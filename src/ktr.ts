@@ -25,14 +25,23 @@ interface Trace {
 }
 
 export function startKtrAgent() {
+	// const agent = childProcess.spawn(KTR_AGENT_PATH, [
+	// 	'--interface-name', TRACEROUTE_INTERFACE_NAME,
+	// 	'--peeringdb-path', PEERINGDB_PATH,
+	// 	'--disable-ipv6',
+	// 	'--completion-timeout', '4s',
+	// 	'--destination-timeout', '15s',
+	// 	'--wait-time-per-hop', '300ms',
+	// 	'--retry-frequency', '1s'
+	// ], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 	const agent = childProcess.spawn(KTR_AGENT_PATH, [
 		'--interface-name', TRACEROUTE_INTERFACE_NAME,
 		'--peeringdb-path', PEERINGDB_PATH,
 		'--disable-ipv6',
 		'--completion-timeout', '4s',
-		'--destination-timeout', '15s',
+		'--destination-timeout', '60s',
 		'--wait-time-per-hop', '300ms',
-		'--retry-frequency', '1s'
+		'--retry-frequency', '500ms'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
 	agent.on('error', (err) => {
