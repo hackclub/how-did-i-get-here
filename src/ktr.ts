@@ -41,7 +41,7 @@ export function startKtrAgent() {
 		'--completion-timeout', '4s',
 		'--destination-timeout', '60s',
 		'--wait-time-per-hop', '300ms',
-		'--retry-frequency', '500ms'
+		'--retry-frequency', '3s'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
 	agent.on('error', (err) => {
