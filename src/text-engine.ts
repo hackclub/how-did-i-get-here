@@ -420,7 +420,7 @@ export function generateText(lastUpdate: ControllerResult_TraceDone) {
 		}
 
 		const getPrefix = () => isStraightEntryFromIsp
-			? 'Anyways, '
+			? 'Anyways'
 			: {
 				'0':   `${lastWasSideNote ? 'Anyways, a' : 'A'}fter a couple of hops`,
 				'1-3': 'Eventually',
