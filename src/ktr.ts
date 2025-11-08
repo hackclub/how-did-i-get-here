@@ -25,34 +25,34 @@ interface Trace {
 }
 
 export function startKtrAgent() {
-	// const agent = childProcess.spawn(KTR_AGENT_PATH, [
-	// 	'--interface-name', TRACEROUTE_INTERFACE_NAME,
-	// 	'--peeringdb-path', PEERINGDB_PATH,
-	// 	'--disable-ipv6',
-	// 	'--completion-timeout', '4s',
-	// 	'--destination-timeout', '15s',
-	// 	'--wait-time-per-hop', '300ms',
-	// 	'--retry-frequency', '1s'
-	// ], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 	const agent = childProcess.spawn(KTR_AGENT_PATH, [
 		'--interface-name', TRACEROUTE_INTERFACE_NAME,
 		'--peeringdb-path', PEERINGDB_PATH,
 		'--disable-ipv6',
 		'--completion-timeout', '4s',
-		'--destination-timeout', '60s',
+		'--destination-timeout', '15s',
 		'--wait-time-per-hop', '300ms',
-		'--retry-frequency', '3s'
+		'--retry-frequency', '1s'
 	], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
+	// const agent = childProcess.spawn(KTR_AGENT_PATH, [
+	// 	'--interface-name', TRACEROUTE_INTERFACE_NAME,
+	// 	'--peeringdb-path', PEERINGDB_PATH,
+	// 	'--disable-ipv6',
+	// 	'--completion-timeout', '4s',
+	// 	'--destination-timeout', '60s',
+	// 	'--wait-time-per-hop', '300ms',
+	// 	'--retry-frequency', '3s'
+	// ], { stdio: [ 'pipe', 'pipe', 'inherit' ] })
 
-	agent.on('error', (err) => {
-		console.error('KTR agent error', err)
-		process.exit(1)
-	})
+	// agent.on('error', (err) => {
+	// 	console.error('KTR agent error', err)
+	// 	process.exit(1)
+	// })
 
-	agent.on('exit', (code) => {
-		console.error(`KTR agent exited with code ${code}`)
-		process.exit(1)
-	})
+	// agent.on('exit', (code) => {
+	// 	// console.error(`KTR agent exited with code ${code}`)
+	// 	// process.exit(1)
+	// })
 
 	const exec = (command: Command) => agent.stdin.write(`${JSON.stringify(command)}\n`)
 	const genCommandId = () => Math.floor(Math.random() * 1000000)
@@ -119,7 +119,11 @@ export function startKtrAgent() {
 		})
 	}
 
-	return { trace, lookupAsn, traces }
+	function kill() {
+		agent.kill()
+	}
+
+	return { trace, lookupAsn, traces, kill }
 }
 
 function getKtrVersion() {

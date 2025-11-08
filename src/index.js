@@ -14,7 +14,6 @@ import { parse as renderMarkdown } from 'marked'
 
 const app = express()
 const router = AsyncRouter()
-const ktr = startKtrAgent()
 
 const TEMPLATE_PATHS = {
 	page:         'src/templates/page.ejs',
@@ -115,6 +114,8 @@ app.use(express.static('src/static'))
 app.use(router)
 
 router.get('/', async (req, res) => {
+	const ktr = startKtrAgent()
+
 	const hetznerInfo = {
 		asn: HETZNER_ASN,
 		network: await ktr.lookupAsn(HETZNER_ASN)
@@ -185,7 +186,10 @@ router.get('/', async (req, res) => {
 					const { streamId, html, isTraceDone } = renderTracerouteUpdate({ update: cloned, pageGlobals, templates, lastStreamId, hetznerInfo })
 					res.write(html)
 					lastStreamId = streamId
-					if (isTraceDone) res.end(ejs.render(afterSplit, { pageGlobals }))
+					if (isTraceDone) {
+						res.end(ejs.render(afterSplit, { pageGlobals }))
+						ktr.kill()
+					}
 					return isTraceDone
 				} catch (error) {
 					clearInterval(refreshInterval)
@@ -208,11 +212,11 @@ router.get('/', async (req, res) => {
 	}
 })
 
-router.get('/admin', async (req, res) => {
-	if (req.query.password !== ADMIN_PASSWORD) return res.sendStatus(401)
-	const html = ejs.render(readTemplates().admin, { traces: ktr.traces })
-	res.status(200).end(html)
-})
+// router.get('/admin', async (req, res) => {
+// 	if (req.query.password !== ADMIN_PASSWORD) return res.sendStatus(401)
+// 	const html = ejs.render(readTemplates().admin, { traces: ktr.traces })
+// 	res.status(200).end(html)
+// })
 
 console.log('starting up...')
 console.log(`ktr version: ${ktrVersion}`)
