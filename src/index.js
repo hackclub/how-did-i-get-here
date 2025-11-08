@@ -8,8 +8,8 @@ import ejs from 'ejs'
 import { AsyncRouter } from 'express-async-router'
 import fs from 'node:fs'
 import { nanoid } from 'nanoid'
-import { startKtrAgent, ktrVersion } from './ktr.js'
-import { getKtrAgent, releaseKtrAgent } from './ktr-pool.js'
+import { ktrVersion } from './ktr.js'
+import { getKtr } from './ktr-pool.js'
 import { generateText, generateEssayTracerouteInfo } from './text-engine.js'
 import { parse as renderMarkdown } from 'marked'
 
@@ -115,7 +115,7 @@ app.use(express.static('src/static'))
 app.use(router)
 
 router.get('/', async (req, res) => {
-	const ktr = await startKtrAgent()
+	const ktr = getKtr()
 
 	const hetznerInfo = {
 		asn: HETZNER_ASN,
@@ -189,7 +189,6 @@ router.get('/', async (req, res) => {
 					lastStreamId = streamId
 					if (isTraceDone) {
 						res.end(ejs.render(afterSplit, { pageGlobals }))
-						releaseKtrAgent(ktr)
 					}
 					return isTraceDone
 				} catch (error) {
