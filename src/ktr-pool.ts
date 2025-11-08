@@ -1,6 +1,6 @@
 import { startKtrAgent } from './ktr.js'
 
-const KTR_POOL = Array.from({ length: 20 }, () => startKtrAgent())
+const KTR_POOL = Array.from({ length: 15 }, () => startKtrAgent())
 let poolIndex = 0
 
 export function getKtr(): ReturnType<typeof startKtrAgent> {
